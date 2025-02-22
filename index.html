@@ -1,1 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>General Surgery Diagram</title>
 
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- LeaderLine for arrows (https://anseki.github.io/leader-line/) -->
+  <script src="leader-line.min.js"></script>
+  <!-- PapaParse for CSV (if needed) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1 id="story-title">What Surgery Is It?</h1>
+
+  <!-- Container for the body silhouette & organs -->
+  <div id="body-container">
+    <!-- Optional background silhouette -->
+    <img id="body-image" src="body_silhouette.png" alt="Body Silhouette" />
+    
+    <!-- Example organ icons (only for surgeries we have data for). 
+         Each organ has an absolutely positioned DIV. 
+         We'll connect them to charts with LeaderLine. -->
+    <div id="organ-colon" class="organ-icon"> 
+      <!-- You can use an <img> or an emoji or an SVG here -->
+      <img src="colon_icon.png" alt="Colon" />
+    </div>
+
+    <div id="organ-stomach" class="organ-icon">
+      <img src="stomach_icon.png" alt="Stomach" />
+    </div>
+    
+    <!-- etc... for each organ we have data for -->
+
+    <!-- Chart containers for each organ, also absolutely positioned -->
+    <div id="chart-colon" class="chart-box">
+      <canvas id="canvas-colon"></canvas>
+    </div>
+
+    <div id="chart-stomach" class="chart-box">
+      <canvas id="canvas-stomach"></canvas>
+    </div>
+
+    <!-- etc... for each organ we have data for -->
+  </div>
+
+  <div class="buttons">
+    <button id="next-btn" onclick="nextStep()" disabled>Next</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
