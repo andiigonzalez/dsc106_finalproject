@@ -25,18 +25,48 @@
     <!-- Example organ icons (only for surgeries we have data for). 
          Each organ has an absolutely positioned DIV. 
          We'll connect them to charts with LeaderLine. -->
+    <div id="organ-thyroid" class="organ-icon"> 
+    <!-- You can use an <img> or an emoji or an SVG here -->
+        <img src="thyroid_icon.png" alt="Thyroid" />
+    </div>
+
+    <div id="organ-vascular" class="organ-icon"> 
+        <!-- VEINS/ARTERIES -->
+        <img src="vascular_icon.png" alt="Vascular System" />
+    </div>
+
+    <div id="organ-breast" class="organ-icon"> 
+        <!-- You can use an <img> or an emoji or an SVG here -->
+        <img src="breast_icon.png" alt="Breast" />
+    </div>
+
+    <div id="organ-stomach" class="organ-icon">
+        <img src="stomach_icon.png" alt="Stomach" />
+    </div>
+    <div id="organ-liver" class="organ-icon">
+        <!--LIVER -->
+        <img src="liver_icon.png" alt="Liver" />
+    </div>
+    <div id="organ-biliary" class="organ-icon">
+        <!--PANCREAS -->
+        <img src="biliary/pancreas_icon.png" alt="Biliary/Pancreas" />
+    </div>
+
     <div id="organ-colon" class="organ-icon"> 
       <!-- You can use an <img> or an emoji or an SVG here -->
       <img src="colon_icon.png" alt="Colon" />
     </div>
 
-    <div id="organ-stomach" class="organ-icon">
-      <img src="stomach_icon.png" alt="Stomach" />
-    </div>
     
     <!-- etc... for each organ we have data for -->
 
     <!-- Chart containers for each organ, also absolutely positioned -->
+    <div id="chart-thyroid" class="chart-box">
+        <canvas id="canvas-thyroid"></canvas>
+    </div>
+    <div id="chart-vascular" class="chart-box">
+        <canvas id="canvas-vascular"></canvas>
+    </div>
     <div id="chart-colon" class="chart-box">
       <canvas id="canvas-colon"></canvas>
     </div>
