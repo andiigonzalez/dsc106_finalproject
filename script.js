@@ -15,8 +15,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let totalSurgeries = data.length;
     data.forEach(d => {
         let optype = d.optype;
-        let isCancer = d.diagnosis === "cancer";
-        let gender = d.gender;
+        let isCancer = /(cancer|tumor|carcinoma|sarcoma|malignant|lymphoma)/i.test(d.dx);
+        let gender = d.sex;
         
         surgeryData[optype] = (surgeryData[optype] || 0) + 1;
         
@@ -98,8 +98,8 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("transform", d => `translate(${arc.centroid(d)})`)
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")
-        .style("font-size", "12px")
-        .style("fill", "white")
+        .style("font-size", "14px")
+        .style("fill", "black")
         .text(d => `${Math.round(d.data.value / d3.sum(data, d => d.value) * 100)}%`);
     
     text.exit().remove();
