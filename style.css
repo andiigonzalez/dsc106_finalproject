@@ -10,22 +10,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 700px;
+  width: 900px
 }
 
 .row {
   display: flex;
-  width: 100%;
-  gap: 100px; 
-}
-
-.system-group {
-  display: flex;
-  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-  width: auto;
+  width: 100%; 
+  flex-wrap: wrap;
 }
 
 h3 {
@@ -38,7 +31,9 @@ h3 {
   display: flex;
   flex-direction: row;
   align-items: center;
+  flex: 1;
   justify-content: center;
+  width: auto;
   gap: 20px;
 }
 
@@ -47,20 +42,20 @@ h3 {
   height: auto;
 }
 
-.pie-chart-container {
+.pie-chart-container{
   width: 150px;
   height: 150px;
   display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .left-chart {
-  order: -60;
+  order: -1; 
+  margin-right: 80px;
 }
 
 .right-chart {
-  order: 60;
+  order: 1; 
+  margin-left: 80px; 
 }
 
 
@@ -104,4 +99,12 @@ button {
 
 button:hover {
   background-color: lightgrey;
+}
+#arrow-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }

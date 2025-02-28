@@ -9,12 +9,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const dots = document.querySelectorAll(".dot");
     const previousButton = document.getElementById("previous-button");
     const nextButton = document.getElementById("next-button");
+    const arrowSvg = d3.select("#arrow-svg");
 
     d3.csv("sugeries.csv").then(function (data) {
         processData(data);
         createPieCharts();
         updateLegend();
         updateDots();
+        updateArrows();
     });
 
 
@@ -67,6 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
         svgElements[optype] = svg;
         updatePieChart(optype, totalSurgeries);
     });
+    updateArrows();
   }
 
   function updatePieChart(optype, totalSurgeries) {
@@ -123,6 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
     text.exit().remove();
     updateLegend();
+    updateArrows();
   }
   
   function updateLegend() {
@@ -209,4 +213,42 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     updateDots();
+    function updateArrows() {
+        arrowSvg.selectAll("*").remove();
+
+        document.querySelectorAll(".organ").forEach(organ => {
+            let chartId = organ.dataset.chart;
+            let chart = document.getElementById(chartId);
+            if (!chart) return;
+
+            let organRect = organ.getBoundingClientRect();
+            let chartRect = chart.getBoundingClientRect();
+
+            let organX = organRect.left + organRect.width / 2;
+            let organY = organRect.top + organRect.height / 2;
+            let chartX = chartRect.left + chartRect.width / 2;
+            let chartY = chartRect.top + chartRect.height / 2;
+
+            arrowSvg.append("line")
+                .attr("x1", organX)
+                .attr("y1", organY)
+                .attr("x2", chartX)
+                .attr("y2", chartY)
+                .attr("stroke", "black")
+                .attr("stroke-width", "2")
+                .attr("marker-end", "url(#arrowhead)");
+        });
+
+        arrowSvg.append("defs").append("marker")
+            .attr("id", "arrowhead")
+            .attr("viewBox", "0 0 10 10")
+            .attr("refX", "8")
+            .attr("refY", "5")
+            .attr("markerWidth", "6")
+            .attr("markerHeight", "6")
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M 0 0 L 10 5 L 0 10 z")
+            .attr("fill", "black");
+    }
 });
