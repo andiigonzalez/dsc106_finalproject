@@ -79,19 +79,19 @@ document.addEventListener("DOMContentLoaded", function () {
     if (currentState === 0) {
         data = [
             { label: optype, value: surgeryData[optype], color: "red" },
-            { label: "Other Surgeries", value: totalSurgeries - surgeryData[optype], color: "grey" }
+            { label: "Other Surgeries", value: totalSurgeries - surgeryData[optype], color: "lightgrey" }
         ];
     } else if (currentState === 1) {
         let total = surgeryData[optype];
         let cancerCases = cancerData[optype] || 0;
         data = [
             { label: "Cancer", value: cancerCases, color: "orange" },
-            { label: "Other", value: total - cancerCases, color: "grey" }];
+            { label: "Other", value: total - cancerCases, color: "lightgrey" }];
       } else {
         // Third toggle state: Split Cancer into Male/Female directly
         data = [
-            { label: "Non-Cancer", value: nonCancerCases, color: "grey" },
-            { label: "Male Cancer", value: maleCases, color: "blue" },
+            { label: "Non-Cancer", value: nonCancerCases, color: "lightgrey" },
+            { label: "Male Cancer", value: maleCases, color: "lightblue" },
             { label: "Female Cancer", value: femaleCases, color: "pink" }
         ];
       }
@@ -139,18 +139,18 @@ document.addEventListener("DOMContentLoaded", function () {
     let legendData;
     if (currentState === 0) {
         legendData = [
-            { label: "All Other Surgeries", color: "grey" },
+            { label: "All Other Surgeries", color: "lightgrey" },
             { label: "Surgery", color: "red" }
         ];
     } else if (currentState === 1) {
         legendData = [
             { label: "Cancer", color: "orange" },
-            { label: "Non-Cancer", color: "grey" }
+            { label: "Non-Cancer", color: "lightgrey" }
         ];
     } else {
         legendData = [
-            { label: "Non-Cancer", color: "grey" },
-            { label: "Male Cancer", color: "blue" },
+            { label: "Non-Cancer", color: "lightgrey" },
+            { label: "Male Cancer", color: "lightblue" },
             { label: "Female Cancer", color: "pink" }
         ];
     }
