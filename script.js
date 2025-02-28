@@ -1,119 +1,113 @@
-let step = 0; 
-let charts = {}; 
-let surgeryData = {};  
-let cancerData = {};  
-let genderData = {};  
-let lines = []; // store LeaderLine objects
-
-// On page load, fetch the CSV & parse
-window.onload = function() {
-  fetch('percentages.csv')
-    .then(response => response.text())
-    .then(csvText => {
-      Papa.parse(csvText, {
-        header: true,
-        complete: function(results) {
-          processData(results.data);
-        }
-      });
-    });
-};
-
-function processData(data) {
-  data.forEach(row => {
-    const optype = row["surgery_name"];
-    surgeryData[optype] = parseFloat(row["pct_of_general"]);
-    cancerData[optype] = parseFloat(row["pct_cancer_indv"]);
-    genderData[optype] = {
-      female: parseFloat(row["cancer_pct_women"]),
-      male: parseFloat(row["cancer_pct_men"])
-    };
+document.addEventListener("DOMContentLoaded", function () {
+  let currentState = 0; // 0: Surgery percentage, 1: Cancer percentage, 2: Cancer gender breakdown
+  let surgeryData = {};
+  let cancerData = {};
+  let genderData = {};
+  let svgElements = {};
+  let width = 200, height = 200, radius = Math.min(width, height) / 2;
+  
+  d3.csv("sugeries.csv").then(function (data) {
+      processData(data);
+      createPieCharts();
   });
   
-  // Create the charts
-  createCharts();
-  
-  // Reveal the "Next" button
-  document.getElementById("next-btn").disabled = false;
-}
-
-// Create a Chart.js pie for each organ
-function createCharts() {
-  // For each surgery type in the CSV
-  Object.keys(surgeryData).forEach(optype => {
-    const canvasId = `canvas-${optype.replace(/\s+/g, '')}`; // match the HTML
-    const ctx = document.getElementById(canvasId);
-    if (!ctx) return; // If there's no matching chart in HTML, skip
-
-    // initial data => Non-cancer vs cancer
-    const chartData = {
-      labels: ["Non-Cancer", "Cancer"],
-      datasets: [{
-        data: [1 - cancerData[optype], cancerData[optype]],
-        backgroundColor: ["#cccccc", "#ff4444"]
-      }]
-    };
-
-    charts[optype] = new Chart(ctx, {
-      type: "pie",
-      data: chartData,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false
-      }
-    });
-
-    // Animate chart box in
-    const chartBox = document.getElementById(`chart-${optype.replace(/\s+/g, '')}`);
-    if (chartBox) {
-      chartBox.style.opacity = 1; // Show chart box
-    }
-
-    // Draw arrow from organ to chart
-    const organEl = document.getElementById(`organ-${optype.replace(/\s+/g, '')}`);
-    if (organEl && chartBox) {
-      const line = new LeaderLine(
-        LeaderLine.pointAnchor(organEl, { x: '50%', y: '50%' }),
-        LeaderLine.pointAnchor(chartBox, { x: '50%', y: '50%' }),
-        {
-          color: '#999',
-          startPlug: 'behind',
-          endPlug: 'arrow2'
+  function processData(data) {
+    let totalSurgeries = data.length;
+    data.forEach(d => {
+        let optype = d.optype;
+        let isCancer = d.diagnosis === "cancer";
+        let gender = d.gender;
+        
+        surgeryData[optype] = (surgeryData[optype] || 0) + 1;
+        
+        if (isCancer) {
+            cancerData[optype] = (cancerData[optype] || 0) + 1;
+            if (!genderData[optype]) {
+                genderData[optype] = { male: 0, female: 0 };
+            }
+            genderData[optype][gender]++;
         }
-      );
-      lines.push(line);
-    }
-  });
+    });
 }
-
-// Called when user clicks "Next"
-function nextStep() {
-  step++;
-
-  if (step === 1) {
-    // Step 2: color the cancer slice (already red in the example),
-    // or highlight it more distinctly if you like
-    Object.keys(charts).forEach(optype => {
-      const chart = charts[optype];
-      // e.g. make the cancer slice bright red
-      chart.data.datasets[0].backgroundColor = ["#cccccc", "#ff0000"];
-      chart.update();
+  
+  function createPieCharts() {
+    let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
+    Object.keys(surgeryData).forEach(optype => {
+        let container = d3.select("#charts-container")
+            .append("div").attr("class", "chart-container")
+            .style("display", "inline-block")
+            .style("margin", "10px")
+            .attr("id", `chart-${optype}`);
+        
+        container.append("h3").text(optype).style("text-align", "center");
+        
+        let svg = container.append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", `translate(${width / 2}, ${height / 2})`);
+        
+        svgElements[optype] = svg;
+        updatePieChart(optype, totalSurgeries);
     });
-  } 
-  else if (step === 2) {
-    // Step 3: split cancer slice into male/female
-    Object.keys(charts).forEach(optype => {
-      const chart = charts[optype];
-      const maleVal = genderData[optype].male * cancerData[optype];
-      const femaleVal = genderData[optype].female * cancerData[optype];
-      // new data => [nonCancer, maleCancer, femaleCancer]
-      chart.data.labels = ["Non-Cancer", "Male Cancer", "Female Cancer"];
-      chart.data.datasets[0].data = [1 - cancerData[optype], maleVal, femaleVal];
-      chart.data.datasets[0].backgroundColor = ["#cccccc", "#4444ff", "#ff44aa"];
-      chart.update();
-    });
-
-    // no more steps, disable next
-    document.getElementById("next-btn").disabled = true;
   }
+
+  function updatePieChart(optype, totalSurgeries) {
+    let data;
+    if (currentState === 0) {
+        data = [
+            { label: optype, value: surgeryData[optype] },
+            { label: "Other Surgeries", value: totalSurgeries - surgeryData[optype] }
+        ];
+    } else if (currentState === 1) {
+        let total = surgeryData[optype];
+        let cancerCases = cancerData[optype] || 0;
+        data = [
+            { label: "Cancer", value: cancerCases },
+            { label: "Other", value: total - cancerCases }
+        ];
+    } else {
+        let totalCancer = cancerData[optype] || 0;
+        let maleCases = genderData[optype]?.male || 0;
+        let femaleCases = genderData[optype]?.female || 0;
+        data = [
+            { label: "Male", value: maleCases, color: "blue" },
+            { label: "Female", value: femaleCases, color: "pink" }
+        ];
+    }
+    
+    let pie = d3.pie().value(d => d.value);
+    let arc = d3.arc().innerRadius(0).outerRadius(radius);
+    
+    let color = d3.scaleOrdinal(d3.schemeCategory10);
+    
+    let svg = svgElements[optype];
+    let paths = svg.selectAll("path").data(pie(data));
+    
+    paths.enter().append("path")
+        .merge(paths)
+        .attr("d", arc)
+        .attr("fill", d => d.data.color || color(d.data.label));
+    
+    paths.exit().remove();
+    
+    let text = svg.selectAll("text").data(pie(data));
+    
+    text.enter().append("text")
+        .merge(text)
+        .attr("transform", d => `translate(${arc.centroid(d)})`)
+        .attr("text-anchor", "middle")
+        .attr("dy", "0.35em")
+        .style("font-size", "12px")
+        .style("fill", "white")
+        .text(d => `${Math.round(d.data.value / d3.sum(data, d => d.value) * 100)}%`);
+    
+    text.exit().remove();
 }
+
+document.getElementById("toggle-button").addEventListener("click", function () {
+    currentState = (currentState + 1) % 3;
+    let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
+    Object.keys(surgeryData).forEach(optype => updatePieChart(optype, totalSurgeries));
+});
+});
