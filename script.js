@@ -77,8 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let cancerCases = cancerData[optype] || 0;
         data = [
             { label: "Cancer", value: cancerCases, color: "orange" },
-            { label: "Other", value: total - cancerCases, color: "grey" }
-        ];
+            { label: "Other", value: total - cancerCases, color: "grey" }];
       } else {
         // Third toggle state: Split Cancer into Male/Female directly
         data = [
@@ -87,8 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
             { label: "Female Cancer", value: femaleCases, color: "pink" }
         ];
       }
-    
-       
+        
   
     let pie = d3.pie().value(d => d.value);
     let arc = d3.arc().innerRadius(0).outerRadius(radius);
@@ -111,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")
         .style("font-size", "12px")
-        .style("fill", "white")
+        .style("fill", "black")
         .text(d => `${Math.round(d.data.value / d3.sum(data, d => d.value) * 100)}%`);
         
     text.exit().remove();
@@ -120,6 +118,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
   function updateLegend() {
     d3.select("#legend").remove();
+
     let legend = d3.select("body").append("div")
         .attr("id", "legend")
         .style("position", "absolute")
@@ -128,23 +127,51 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("background", "white")
         .style("padding", "10px")
 
-    
     let legendData;
     if (currentState === 0) {
-        legendData = ["Other Surgeries", "Optype"];
+        legendData = [
+            { label: "Other Surgeries", color: "grey" },
+            { label: "Optype", color: "red" }
+        ];
     } else if (currentState === 1) {
-        legendData = ["Cancer (Yellow)", "Non-Cancer"];
+        legendData = [
+            { label: "Cancer", color: "orange" },
+            { label: "Non-Cancer", color: "grey" }
+        ];
     } else {
-        legendData = ["Non-Cancer", "Cancer (Yellow)", "Male Cancer (Blue)", "Female Cancer (Pink)"];
+        legendData = [
+            { label: "Non-Cancer", color: "grey" },
+            { label: "Male Cancer", color: "blue" },
+            { label: "Female Cancer", color: "pink" }
+        ];
     }
+    console.log("Legend Data:", legendData);
     
-    legend.selectAll("div")
+    let legendItems = legend.selectAll(".legend-item")
         .data(legendData)
         .enter()
         .append("div")
-        .style("margin", "5px")
-        .text(d => d)
-}
+        .attr("class", "legend-item")
+        .style("display", "flex")
+        .style("align-items", "center")
+        .style("margin", "5px");
+
+    // Add color swatch
+    legendItems.append("span")
+        .style("display", "inline-block")
+        .style("width", "16px")
+        .style("height", "16px")
+        .style("margin-right", "5px")
+        .style("border-radius", "50%")
+        .style("background-color", d => d.color);
+
+    // Add legend text
+    legendItems.append("span")
+        .text(d => d.label)
+        .style("font-size", "18px")
+        .style("color", "#333");
+    }
+
 
   document.getElementById("toggle-button").addEventListener("click", function () {
       currentState = (currentState + 1) % 3;
