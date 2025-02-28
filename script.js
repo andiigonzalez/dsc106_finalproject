@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   d3.csv("sugeries.csv").then(function (data) {
       processData(data);
       createPieCharts();
+      updateLegend();
   });
   
   function processData(data) {
@@ -21,17 +22,24 @@ document.addEventListener("DOMContentLoaded", function () {
         surgeryData[optype] = (surgeryData[optype] || 0) + 1;
         
         if (isCancer) {
-            cancerData[optype] = (cancerData[optype] || 0) + 1;
-            if (!genderData[optype]) {
-                genderData[optype] = { male: 0, female: 0 };
-            }
-            genderData[optype][gender]++;
-        }
-    });
+          cancerData[optype] = (cancerData[optype] || 0) + 1;
+          if (!genderData[optype]) {
+              genderData[optype] = { M: 0, F: 0 };
+          }
+
+          // Map "M" to "male" and "F" to "female"
+          if (gender === "M") {
+              genderData[optype].M++;
+          } else if (gender === "F") {
+              genderData[optype].F++;
+          }
+      }
+  });
 }
   
   function createPieCharts() {
     let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
+    
     Object.keys(surgeryData).forEach(optype => {
         let container = d3.select("#charts-container")
             .append("div").attr("class", "chart-container")
@@ -53,41 +61,45 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updatePieChart(optype, totalSurgeries) {
+    let total = surgeryData[optype];
+    let totalCancer = cancerData[optype] || 0;
+    let maleCases = genderData[optype]?.M || 0;
+    let femaleCases = genderData[optype]?.F || 0;
+    let nonCancerCases = total - totalCancer;
     let data;
     if (currentState === 0) {
         data = [
-            { label: optype, value: surgeryData[optype] },
-            { label: "Other Surgeries", value: totalSurgeries - surgeryData[optype] }
+            { label: optype, value: surgeryData[optype], color: "red" },
+            { label: "Other Surgeries", value: totalSurgeries - surgeryData[optype], color: "grey" }
         ];
     } else if (currentState === 1) {
         let total = surgeryData[optype];
         let cancerCases = cancerData[optype] || 0;
         data = [
-            { label: "Cancer", value: cancerCases },
-            { label: "Other", value: total - cancerCases }
+            { label: "Cancer", value: cancerCases, color: "orange" },
+            { label: "Other", value: total - cancerCases, color: "grey" }
         ];
-    } else {
-        let totalCancer = cancerData[optype] || 0;
-        let maleCases = genderData[optype]?.male || 0;
-        let femaleCases = genderData[optype]?.female || 0;
+      } else {
+        // Third toggle state: Split Cancer into Male/Female directly
         data = [
-            { label: "Male", value: maleCases, color: "blue" },
-            { label: "Female", value: femaleCases, color: "pink" }
+            { label: "Non-Cancer", value: nonCancerCases, color: "grey" },
+            { label: "Male Cancer", value: maleCases, color: "blue" },
+            { label: "Female Cancer", value: femaleCases, color: "pink" }
         ];
-    }
+      }
     
+       
+  
     let pie = d3.pie().value(d => d.value);
     let arc = d3.arc().innerRadius(0).outerRadius(radius);
     
-    let color = d3.scaleOrdinal(d3.schemeCategory10);
-    
     let svg = svgElements[optype];
-    let paths = svg.selectAll("path").data(pie(data));
+    let paths = svg.selectAll("path").data(pie(data.filter(d => d.value > 0)));
     
     paths.enter().append("path")
         .merge(paths)
         .attr("d", arc)
-        .attr("fill", d => d.data.color || color(d.data.label));
+        .attr("fill", d => d.data.color);
     
     paths.exit().remove();
     
@@ -98,16 +110,45 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("transform", d => `translate(${arc.centroid(d)})`)
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")
-        .style("font-size", "14px")
-        .style("fill", "black")
+        .style("font-size", "12px")
+        .style("fill", "white")
         .text(d => `${Math.round(d.data.value / d3.sum(data, d => d.value) * 100)}%`);
-    
+        
     text.exit().remove();
+    updateLegend();
+  }
+  
+  function updateLegend() {
+    d3.select("#legend").remove();
+    let legend = d3.select("body").append("div")
+        .attr("id", "legend")
+        .style("position", "absolute")
+        .style("top", "10px")
+        .style("right", "10px")
+        .style("background", "white")
+        .style("padding", "10px")
+
+    
+    let legendData;
+    if (currentState === 0) {
+        legendData = ["Other Surgeries", "Optype"];
+    } else if (currentState === 1) {
+        legendData = ["Cancer (Yellow)", "Non-Cancer"];
+    } else {
+        legendData = ["Non-Cancer", "Cancer (Yellow)", "Male Cancer (Blue)", "Female Cancer (Pink)"];
+    }
+    
+    legend.selectAll("div")
+        .data(legendData)
+        .enter()
+        .append("div")
+        .style("margin", "5px")
+        .text(d => d)
 }
 
-document.getElementById("toggle-button").addEventListener("click", function () {
-    currentState = (currentState + 1) % 3;
-    let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
-    Object.keys(surgeryData).forEach(optype => updatePieChart(optype, totalSurgeries));
-});
+  document.getElementById("toggle-button").addEventListener("click", function () {
+      currentState = (currentState + 1) % 3;
+      let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
+      Object.keys(surgeryData).forEach(optype => updatePieChart(optype, totalSurgeries));
+  });
 });
