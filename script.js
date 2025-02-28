@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .append("g")
             .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
+
         svgElements[optype] = svg;
         updatePieChart(optype, totalSurgeries);
     });
@@ -78,26 +79,39 @@ document.addEventListener("DOMContentLoaded", function () {
     let maleCases = genderData[optype]?.M || 0;
     let femaleCases = genderData[optype]?.F || 0;
     let nonCancerCases = total - totalCancer;
+    let textContent = "";
+    let color = "black";
+
     let data;
     if (currentState === 0) {
+        let percent = Math.round((total / totalSurgeries) * 100);
         data = [
             { label: optype, value: surgeryData[optype], color: "red" },
             { label: "Other Surgeries", value: totalSurgeries - surgeryData[optype], color: "lightgrey" }
         ];
+        color = "red";
+        textContent = `Out of all surgeries, <b style="color:${color}"> ${optype}</b> constituted <b style="color:${color}">${percent}%</b>.`;
     } else if (currentState === 1) {
         let total = surgeryData[optype];
         let cancerCases = cancerData[optype] || 0;
+        let percent = total === 0 ? 0 : Math.round((totalCancer / total) * 100);
         data = [
             { label: "Cancer", value: cancerCases, color: "orange" },
             { label: "Other", value: total - cancerCases, color: "lightgrey" }];
+        color = "orange";
+        textContent = `Out of all <b style="color:${color}">${optype}</b> surgeries, <b style="color:${color}">${percent}%</b> were cancer diagnoses.`;
       } else {
         // Third toggle state: Split Cancer into Male/Female directly
+        let percentMale = totalCancer === 0 ? 0 : Math.round((maleCases / totalCancer) * 100);
+        let percentFemale = totalCancer === 0 ? 0 : Math.round((femaleCases / totalCancer) * 100);
         data = [
             { label: "Non-Cancer", value: nonCancerCases, color: "lightgrey" },
             { label: "Male Cancer", value: maleCases, color: "lightblue" },
             { label: "Female Cancer", value: femaleCases, color: "pink" }
         ];
+        textContent = `Women made up <b style="color:pink">${percentFemale}%</b> and men <b style="color:lightblue">${percentMale}%</b> of the cancer diagnoses.`;
       }
+      d3.select(`#chart-${optype} .chart-text`).html(textContent);
         
   
     let pie = d3.pie().value(d => d.value);
@@ -125,6 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .text(d => `${Math.round(d.data.value / d3.sum(data, d => d.value) * 100)}%`);
         
     text.exit().remove();
+    d3.select(`#chart-${optype} .chart-text`).html(textContent);
     updateLegend();
     updateArrows();
   }
