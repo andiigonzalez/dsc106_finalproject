@@ -7,12 +7,116 @@
   <script src="https://d3js.org/d3.v6.min.js"></script>
 
 
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1 id="story-title">What Surgery Is It?</h1>
-  <button id="toggle-button">Toggle View</button>
-  <div id="charts-container"></div>
+  <div id="toggle-container">
+    <button id="previous-button">Previous</button>
+    <div id="dots-container">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+    </div>
+    <button id="next-button">Next</button>
+  </div>
+
+  <div id="main-container">
+
+    <!-- Lymphatic-Endocrine System (Pie Chart on Left) -->
+    <div class="row">
+      <div class="pie-chart-container left-chart" id="chart-Lymphatic/Endocrine"></div>
+      <div class="system-group" id="lymphatic-endocrine">
+        <h3>Lymphatic/Endocrine Organs </h3>
+        <div class="organ-container">
+        <img src="Images/Thyroid.png" class="organ">
+        <img src="Images/Thymus_Gland.png" class="organ">
+        <img src="Images/Spleen.png" class="organ">
+      </div>
+    </div>
+  </div>
+
+    <!-- Cardiovascular System (Pie Chart on Right) -->
+  <div class="row">
+     <div class="system-group" id="cardio-vascular">
+      <h3>Cardiovascular System</h3>
+      <div class="organ-container">
+      <img src="Images/Heart.png" class="organ">
+      </div>
+    </div>
+    <div class="pie-chart-container right-chart" id="chart-Cardiovascular"></div>
+  </div>
+
+    <!-- Digestive System (Pie Chart on Left) -->
+  <div class="row">
+    <div class="pie-chart-container left-chart" id="chart-Digestive"></div>
+    <div class="system-group">
+      <h3>Digestive System</h3>
+      <div class="organ-container">
+      <img src="Images/Stomach.png" class="organ">
+      <img src="Images/Gall Bladder.png" class="organ">
+    </div>
+    </div>
+  </div>
+
+    <!-- Hepatic System (Pie Chart on Right) -->
+    <div class="row">
+      <div class="system-group">
+        <h3>Hepatic System</h3>
+        <div class="organ-container">
+          <img src="Images/Liver.png" class="organ">
+        </div>
+      </div>
+      <div class="pie-chart-container right-chart" id="chart-Hepatic"></div>
+    </div>
+
+    <div class="row">
+      <div class="pie-chart-container left-chart" id="chart-Pancreatic-Biliary"></div>
+      <div class="system-group">
+        <h3>Pancreatic & Biliary System</h3>
+        <div class="organ-container">
+          <img src="Images/Pancreas.png" class="organ">
+        </div>
+      </div>
+    </div>
+
+    <!-- Colorectal System -->
+    <div class="row">
+      <div class="system-group">
+        <h3>Colorectal System</h3>
+        <div class="organ-container">
+          <img src="Images/Intestines.png" class="organ">
+        </div>
+      </div>
+      <div class="pie-chart-container right-chart" id="chart-Colorectal"></div>
+    </div>
+
+    <!-- Urinary System -->
+    <div class="row">
+      <div class="pie-chart-container left-chart" id="chart-Urinary"></div>
+      <div class="system-group">
+        <h3>Urinary System</h3>
+        <div class="organ-container">
+          <img src="Images/Kidneys.png" class="organ">
+          <img src="Images/Bladder.png" class="organ">
+        </div>
+      </div>
+    </div>
+
+    <!-- Reproductive System -->
+    <div class="row">
+      <div class="system-group">
+        <h3>Reproductive System</h3>
+        <div class="organ-container">
+          <img src="Images/Female_RS.png" class="organ">
+          <img src="Images/Male_RS.png" class="organ">
+        </div>
+      </div>
+      <div class="pie-chart-container right-chart" id="chart-Reproductive"></div>
+    </div>
+
+  </div>
 
   <script src="script.js"></script>
 </body>
