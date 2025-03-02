@@ -21,10 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
     d3.csv("sugeries.csv").then(function (data) {
         processData(data);
         createPieCharts();
-        updateLegend();
-        updateDots();
-        updateArrows();
-        updateTitle();
+        updateAll();
     });
 
 
@@ -58,7 +55,12 @@ document.addEventListener("DOMContentLoaded", function () {
     let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
     
     Object.keys(surgeryData).forEach(optype => { 
-        let container = d3.select(`#chart-${optype}`);
+        let container = d3.select(`#chart-${optype}`)
+            .style("min-height", "250px")  // More space
+            .style("display", "flex")
+            .style("flex-direction", "column")
+            .style("align-items", "center")
+            .style("justify-content", "center");
 
         if (container.empty()) {
             console.warn(`Missing container: chart-${optype}`);
@@ -67,12 +69,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!svgElements[optype]) {
             let svg = container.append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .style("display", "block")
+                .attr("width", width + 50)  // Increase width
+                .attr("height", height + 50)  // Increase height
+                .style("overflow", "visible")  // Ensure nothing gets cut off
                 .append("g")
-                .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
+                .attr("transform", `translate(${(width + 50) / 2}, ${(height + 50) / 2})`);
+        
             svgElements[optype] = svg;
         }
 
@@ -163,18 +165,41 @@ document.addEventListener("DOMContentLoaded", function () {
         .merge(text)
         .transition()
         .duration(500)
-        .attr("transform", d => `translate(${arc.centroid(d)})`)
-        .attr("text-anchor", "middle")
+        .attr("transform", d => {
+        
+            let angle = (d.startAngle + d.endAngle) / 2 -Math.PI/2; // Midpoint of slice
+            let isLargest = d.data.value === d3.max(data, d => d.value);
+
+            let offset = isLargest ? -radius * 0.2 : radius +45; 
+            let x = Math.cos(angle) * offset;
+            let y = Math.sin(angle) * offset + radius * 0.5
+
+            return `translate(${x}, ${y})`;
+        })
+        .attr("text-anchor", "middle") // Ensures proper centering
         .attr("dy", "0.35em")
-        .style("font-size", "12px")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
         .style("fill", "black")
         .text(d => `${Math.round(d.data.value / d3.sum(data, d => d.value) * 100)}%`);
 
-    text.exit().remove();
 
-    updateLegend();
-    updateTitle();
-    updateArrows();
+
+
+        text.exit().remove();
+    }
+
+    function updateAll() {
+        let totalSurgeries = d3.sum(Object.values(surgeryData));
+        updateTitle();
+        updateLegend();
+        updateDots();
+
+        if (currentState === 3) {
+            showComparisonLayout(totalSurgeries);
+        } else {
+            Object.keys(surgeryData).forEach(optype => updatePieChart(optype, totalSurgeries));
+        }
     }
 
     function updateTitle() {
@@ -249,95 +274,59 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function updateAll() {
-        updateDots();
-        let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
-        Object.keys(surgeryData).forEach(optype => updatePieChart(optype, totalSurgeries));
-    }
 
-      function showComparisonLayout(totalSurgeries) {
-        Object.keys(surgeryData).forEach(optype => {
-            let container = d3.select(`#chart-${optype}`);
-            if (container.empty()) return;
-
-            container.html(""); // Clear previous charts
-
-            // ✅ Create a vertical stack for three pie charts
-            let comparisonContainer = container.append("div")
-                .attr("class", "comparison-layout")
-                .style("display", "flex")
-                .style("flex-direction", "column")
-                .style("align-items", "center");
-
-            // ✅ Add organ system title
-            comparisonContainer.append("h3")
-                .text(optype.replace("-", " ")) // Format title properly
-                .style("text-align", "center")
-                .style("margin-bottom", "10px");
-
-            // ✅ Generate three stacked pie charts
-            for (let i = 0; i < 3; i++) {
-                let svg = comparisonContainer.append("svg")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .append("g")
-                    .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
-                svgElements[`${optype}-${i}`] = svg;
-                updatePieChart(`${optype}-${i}`, totalSurgeries);
-            }
+    function updateDots() {
+        dots.forEach((dot, index) => {
+            dot.classList.toggle("active", index === currentState);
         });
     }
 
-    // Circular Navigation for Next and Previous Buttons
+    function updateLegend() {
+        d3.select("#legend").remove();
+        let legend = d3.select("body").append("div")
+            .attr("id", "legend")
+            .style("position", "absolute")
+            .style("top", "10px")
+            .style("right", "10px")
+            .style("background", "white")
+            .style("padding", "10px");
+
+        let legendData = [
+            { label: "All Other Surgeries", color: "lightgrey" },
+            { label: "Surgery", color: "red" }
+        ];
+
+        if (currentState === 1) {
+            legendData = [
+                { label: "Cancer", color: "orange" },
+                { label: "Non-Cancer", color: "lightgrey" }
+            ];
+        } else if (currentState === 2) {
+            legendData = [
+                { label: "Non-Cancer", color: "lightgrey" },
+                { label: "Male Cancer", color: "lightblue" },
+                { label: "Female Cancer", color: "pink" }
+            ];
+        }
+
+        legend.selectAll(".legend-item")
+            .data(legendData)
+            .enter()
+            .append("div")
+            .style("display", "flex")
+            .style("align-items", "center")
+            .html(d => `<span style="background-color:${d.color}; width:16px; height:16px; margin-right:5px; border-radius:50%;"></span>${d.label}`);
+    }
+
     nextButton.addEventListener("click", function () {
-        currentState = (currentState + 1) % dots.length; // Moves forward, loops back to 0
+        currentState = (currentState + 1) % 4;
         updateAll();
     });
 
     previousButton.addEventListener("click", function () {
-        currentState = (currentState - 1 + dots.length) % dots.length; // Moves backward, loops to last dot
+        currentState = (currentState - 1 + 4) % 4;
         updateAll();
     });
 
-
-    updateDots();
-    function updateArrows() {
-        arrowSvg.selectAll("*").remove();
-
-        document.querySelectorAll(".organ").forEach(organ => {
-            let chartId = organ.dataset.chart;
-            let chart = document.getElementById(chartId);
-            if (!chart) return;
-
-            let organRect = organ.getBoundingClientRect();
-            let chartRect = chart.getBoundingClientRect();
-
-            let organX = organRect.left + organRect.width / 2;
-            let organY = organRect.top + organRect.height / 2;
-            let chartX = chartRect.left + chartRect.width / 2;
-            let chartY = chartRect.top + chartRect.height / 2;
-
-            arrowSvg.append("line")
-                .attr("x1", organX)
-                .attr("y1", organY)
-                .attr("x2", chartX)
-                .attr("y2", chartY)
-                .attr("stroke", "black")
-                .attr("stroke-width", "2")
-                .attr("marker-end", "url(#arrowhead)");
-        });
-
-        arrowSvg.append("defs").append("marker")
-            .attr("id", "arrowhead")
-            .attr("viewBox", "0 0 10 10")
-            .attr("refX", "8")
-            .attr("refY", "5")
-            .attr("markerWidth", "6")
-            .attr("markerHeight", "6")
-            .attr("orient", "auto")
-            .append("path")
-            .attr("d", "M 0 0 L 10 5 L 0 10 z")
-            .attr("fill", "black");
-    }
+    updateAll();
 });

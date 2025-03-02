@@ -42,8 +42,8 @@ h3 {
 }
 
 .pie-chart-container {
-  width: 200px;
-  height: 200px;
+  width: 300px;
+  height: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -81,8 +81,8 @@ h3 {
 }
 
 .dot {
-  width: 15px;
-  height: 15px;
+  width: 12px;
+  height: 12px;
   background-color: grey;
   border-radius: 50%;
   display: space-between;
@@ -115,9 +115,11 @@ button:hover {
 }
 
 .chart-text-container {
-  width: 200px;
+  width: 250px;
   padding-left: 10px;
   font-size: 14px;
+  top:-30px;
+  margin-bottom:30px;
   text-align: left;
 }
 
@@ -125,12 +127,12 @@ button:hover {
 .left-chart .chart-text-container {
   text-align: center;
   padding-left: 0;
-  padding-right: 15px;
+  padding-right: 18px;
 }
 
 .right-chart .chart-text-container {
   text-align: center;
-  padding-left: 15px;
+  padding-left: 18px;
 }
 #arrow-svg {
   position: absolute;
