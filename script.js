@@ -11,12 +11,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const nextButton = document.getElementById("next-button");
     const arrowSvg = d3.select("#arrow-svg");
 
+
+    let title = d3.select("#title").append("h2")
+        .attr("id", "status-title")
+        .style("text-align", "center")
+        .style("margin-bottom", "18px");
+
+
     d3.csv("sugeries.csv").then(function (data) {
         processData(data);
         createPieCharts();
         updateLegend();
         updateDots();
         updateArrows();
+        updateTitle();
     });
 
 
@@ -57,21 +65,22 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        container.selectAll("svg").remove(); // Remove previous SVGs
+        if (!svgElements[optype]) {
+            let svg = container.append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .style("display", "block")
+                .append("g")
+                .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
-        let svg = container.append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .style("display", "block")
-            .append("g")
-            .attr("transform", `translate(${width / 2}, ${height / 2})`);
+            svgElements[optype] = svg;
+        }
 
-
-        svgElements[optype] = svg;
         updatePieChart(optype, totalSurgeries);
     });
+
     updateArrows();
-  }
+}
 
   function updatePieChart(optype, totalSurgeries) {
     let total = surgeryData[optype];
@@ -119,61 +128,94 @@ document.addEventListener("DOMContentLoaded", function () {
     
     let svg = svgElements[optype];
     let paths = svg.selectAll("path").data(pie(data.filter(d => d.value > 0)));
+
+    paths.transition()
+            .duration(500)
+            .attrTween("d", function(d) {
+                let interpolator = d3.interpolate(this._current || d, d);
+                this._current = interpolator(1);
+                return function(t) {
+                    return arc(interpolator(t));
+                };
+            })
+            .attr("fill", d => d.data.color);
+
     
-    paths.enter().append("path")
-        .merge(paths)
+    paths.enter()
+        .append("path")
         .attr("d", arc)
-        .attr("fill", d => d.data.color);
-    
+        .attr("fill", d => d.data.color)
+        .each(function(d) { this._current = d; }) // Store current state for transitions
+        .transition()
+        .duration(500)
+        .attrTween("d", function(d) {
+            let interpolator = d3.interpolate({ startAngle: 0, endAngle: 0 }, d);
+            return function(t) {
+                return arc(interpolator(t));
+            };
+        });
+
     paths.exit().remove();
-    
+
     let text = svg.selectAll("text").data(pie(data));
-    
+
     text.enter().append("text")
         .merge(text)
+        .transition()
+        .duration(500)
         .attr("transform", d => `translate(${arc.centroid(d)})`)
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")
         .style("font-size", "12px")
         .style("fill", "black")
         .text(d => `${Math.round(d.data.value / d3.sum(data, d => d.value) * 100)}%`);
-        
+
     text.exit().remove();
-    d3.select(`#chart-${optype} .chart-text`).html(textContent);
+
     updateLegend();
+    updateTitle();
     updateArrows();
-  }
-  
-  function updateLegend() {
-    d3.select("#legend").remove();
-
-    let legend = d3.select("body").append("div")
-        .attr("id", "legend")
-        .style("position", "absolute")
-        .style("top", "10px")
-        .style("right", "10px")
-        .style("background", "white")
-        .style("padding", "10px")
-
-    let legendData;
-    if (currentState === 0) {
-        legendData = [
-            { label: "All Other Surgeries", color: "lightgrey" },
-            { label: "Surgery", color: "red" }
-        ];
-    } else if (currentState === 1) {
-        legendData = [
-            { label: "Cancer", color: "orange" },
-            { label: "Non-Cancer", color: "lightgrey" }
-        ];
-    } else {
-        legendData = [
-            { label: "Non-Cancer", color: "lightgrey" },
-            { label: "Male Cancer", color: "lightblue" },
-            { label: "Female Cancer", color: "pink" }
-        ];
     }
-    console.log("Legend Data:", legendData);
+
+    function updateTitle() {
+        const titles = [
+            "An analysis of the Distribution of Surgeries by Organs and Systems",
+            "The Distribution of Surgeries with Cancer vs Non-Cancer Diagnoses",
+            "A Comparison of Female vs Male Cancer Diagnoses by Organs and Organ Systems"
+        ];
+        title.text(titles[currentState]);
+    }
+  
+    function updateLegend() {
+        d3.select("#legend").remove();
+
+        let legend = d3.select("body").append("div")
+            .attr("id", "legend")
+            .style("position", "absolute")
+            .style("top", "10px")
+            .style("right", "10px")
+            .style("background", "white")
+            .style("padding", "10px")
+
+        let legendData;
+        if (currentState === 0) {
+            legendData = [
+                { label: "All Other Surgeries", color: "lightgrey" },
+                { label: "Surgery", color: "red" }
+            ];
+        } else if (currentState === 1) {
+            legendData = [
+                { label: "Cancer", color: "orange" },
+                { label: "Non-Cancer", color: "lightgrey" }
+            ];
+        } else {
+            legendData = [
+                { label: "Non-Cancer", color: "lightgrey" },
+                { label: "Male Cancer", color: "lightblue" },
+                { label: "Female Cancer", color: "pink" }
+            ];
+        }
+        console.log("Legend Data:", legendData);
     
     let legendItems = legend.selectAll(".legend-item")
         .data(legendData)
@@ -213,19 +255,51 @@ document.addEventListener("DOMContentLoaded", function () {
         Object.keys(surgeryData).forEach(optype => updatePieChart(optype, totalSurgeries));
     }
 
+      function showComparisonLayout(totalSurgeries) {
+        Object.keys(surgeryData).forEach(optype => {
+            let container = d3.select(`#chart-${optype}`);
+            if (container.empty()) return;
+
+            container.html(""); // Clear previous charts
+
+            // ✅ Create a vertical stack for three pie charts
+            let comparisonContainer = container.append("div")
+                .attr("class", "comparison-layout")
+                .style("display", "flex")
+                .style("flex-direction", "column")
+                .style("align-items", "center");
+
+            // ✅ Add organ system title
+            comparisonContainer.append("h3")
+                .text(optype.replace("-", " ")) // Format title properly
+                .style("text-align", "center")
+                .style("margin-bottom", "10px");
+
+            // ✅ Generate three stacked pie charts
+            for (let i = 0; i < 3; i++) {
+                let svg = comparisonContainer.append("svg")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .append("g")
+                    .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+                svgElements[`${optype}-${i}`] = svg;
+                updatePieChart(`${optype}-${i}`, totalSurgeries);
+            }
+        });
+    }
+
+    // Circular Navigation for Next and Previous Buttons
     nextButton.addEventListener("click", function () {
-        if (currentState < dots.length - 1) {
-            currentState++;
-            updateAll();
-        }
+        currentState = (currentState + 1) % dots.length; // Moves forward, loops back to 0
+        updateAll();
     });
 
     previousButton.addEventListener("click", function () {
-        if (currentState > 0) {
-            currentState--;
-            updateAll();
-        }
+        currentState = (currentState - 1 + dots.length) % dots.length; // Moves backward, loops to last dot
+        updateAll();
     });
+
 
     updateDots();
     function updateArrows() {
