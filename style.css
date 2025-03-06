@@ -53,20 +53,7 @@ nav {
 
 
 
-#main-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 900px
-}
 
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%; 
-  flex-wrap: wrap;
-}
 
 h3 {
   font-size: 20px;
@@ -74,41 +61,9 @@ h3 {
   text-align: top;
 }
 
-.organ-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  flex: 1; /* Ensures organs are centered */
-  gap: 30px; /* Add space between organs */
-}
 
-.organ {
-  width: 100px;
-  height: auto;
-}
 
-.pie-chart-container {
-  width: 300px;
-  height: 300px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 2; /* Ensures pie charts stay at the sides */
-  text-align: center;
-  position: relative;
-}
 
-.left-chart {
-  order: -1; 
-  margin-right: 80px;
-}
-
-.right-chart {
-  order: 1; 
-  margin-left: 80px; 
-}
 
 
 #toggle-container {
@@ -166,21 +121,11 @@ button:hover {
   padding-left: 10px;
   font-size: 14px;
   top:-30px;
-  margin-bottom:30px;
   text-align: left;
 }
 
 /* Ensure text is positioned to the right or left */
-.left-chart .chart-text-container {
-  text-align: center;
-  padding-left: 0;
-  padding-right: 18px;
-}
 
-.right-chart .chart-text-container {
-  text-align: center;
-  padding-left: 18px;
-}
 #arrow-svg {
   position: absolute;
   width: 100%;
