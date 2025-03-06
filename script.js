@@ -1,3 +1,72 @@
+function $$(selector, context = document) {
+    return Array.from(context.querySelectorAll(selector));
+  }
+  
+  
+  const ARE_WE_HOME = document.documentElement.classList.contains("Home");
+  
+  
+  const pages = [
+    { url: "", title: "Home" },
+    { url: "https://andiigonzalez.github.io/dsc106_finalproject/index2.html", title: "Different Layout Try" },
+    { url: "https://andiigonzalez.github.io/dsc106_finalproject/writeup.html", title: 'Writeup' }]
+  
+    
+
+  // Automatic detection of the OS color scheme
+  const osDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
+  const osLightMode = matchMedia("(prefers-color-scheme: light)").matches;
+  
+  document.body.insertAdjacentHTML(
+    "afterbegin",
+    `
+    <label class="color-scheme">
+      Theme:
+      <select>
+        <option value="light dark">Automatic</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </label>
+    `
+  );
+  
+  
+  const select = document.querySelector(".color-scheme select");
+  const savedScheme = localStorage.colorScheme || (osDarkMode ? "dark" : "light dark");
+  document.documentElement.style.setProperty("color-scheme", savedScheme);
+  if (savedScheme === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  } else if (savedScheme === "light") {
+    document.documentElement.classList.add("light-mode");
+  }
+  select.value = savedScheme;
+  
+  
+  select.addEventListener("input", function (event) {
+    const colorScheme = event.target.value;
+    document.documentElement.classList.remove("dark-mode", "light-mode");
+  
+    if (colorScheme === "dark") {
+      document.documentElement.classList.add("dark-mode");
+      document.documentElement.style.setProperty("color-scheme", "dark");
+    } else if (colorScheme === "light") {
+      document.documentElement.classList.add("light-mode");
+      document.documentElement.style.setProperty("color-scheme", "light");
+    } else {
+    
+      document.documentElement.style.setProperty("color-scheme", "light dark");
+    }
+  
+    localStorage.colorScheme = colorScheme;
+    document.documentElement.offsetHeight; 
+  });
+
+
+
+
+
+
 document.addEventListener("DOMContentLoaded", function () {
     let currentState = 0;
     let surgeryData = {};
@@ -286,8 +355,8 @@ document.addEventListener("DOMContentLoaded", function () {
         let legend = d3.select("body").append("div")
             .attr("id", "legend")
             .style("position", "absolute")
-            .style("top", "10px")
-            .style("right", "10px")
+            .style("top", "250px")
+            .style("right", "120px")
             .style("background", "white")
             .style("padding", "10px");
 
