@@ -115,11 +115,11 @@ document.addEventListener("DOMContentLoaded", function () {
     d3.csv("sugeries.csv").then(function (data) {
         processData(data);
 
-        d3.xml("Images/only_organs_removebg.svg").then(function (xml) {
+        d3.xml("Images/only_organs_nobg.png").then(function (xml) {
             let importedNode = document.importNode(xml.documentElement, true);
             centerContainer.node().appendChild(importedNode);
             
-            const bodySvg = centerContainer.select("svg");
+            const bodySvg = centerContainer.select("img");
             
 
             bodySvg.attr("width", "100%").attr("height", "100%")
@@ -301,6 +301,7 @@ document.addEventListener("DOMContentLoaded", function () {
         text.exit().remove();
     }
     function showOrganConnection(pos) {
+        drawConnectingArrows() 
         arrowsSvg.selectAll("*").remove();
 
         if (!pos.element) return;
@@ -366,7 +367,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     .style("filter", null)
                     .style("opacity", null);
             }
+            
         });
+        drawConnectingArrows() 
     }
 
     function updateAll() {
@@ -453,6 +456,53 @@ document.addEventListener("DOMContentLoaded", function () {
         updateAll();
         hideOrganConnections();
     });
+
+    function drawConnectingArrows() {
+        arrowsSvg.selectAll("*").remove();
+    
+        arrowsSvg.append("defs").append("marker")
+            .attr("id", "arrowhead")
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 8)
+            .attr("refY", 0)
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5")
+            .attr("fill", "#555");
+    
+        setTimeout(() => {
+            const bodyRect = document.getElementById("body-image").getBoundingClientRect();
+    
+            positions.forEach(pos => {
+                const chartContainer = d3.select(`#chart-container-${pos.id}`).node();
+                if (!chartContainer) return;
+    
+                const chartRect = chartContainer.getBoundingClientRect();
+    
+                // Approximate organ positions manually
+                const organX = bodyRect.left + bodyRect.width / 2 + parseFloat(pos.x) * 0.6;
+                const organY = bodyRect.top + bodyRect.height / 2 + parseFloat(pos.y) * 0.6;
+    
+                // Calculate chart position
+                const chartX = chartRect.left + chartRect.width / 2;
+                const chartY = chartRect.top + chartRect.height / 2;
+    
+                const midX = (organX + chartX) / 2;
+                const midY = (organY + chartY) / 2;
+    
+                arrowsSvg.append("path")
+                    .attr("d", `M${organX},${organY} Q${midX},${midY} ${chartX},${chartY}`)
+                    .attr("fill", "none")
+                    .attr("stroke", "#555")
+                    .attr("stroke-width", 2)
+                    .attr("stroke-dasharray", "5,3")
+                    .attr("marker-end", "url(#arrowhead)");
+            });
+        }, 500);
+    }
+    
 
     // Initial update
     updateAll();
