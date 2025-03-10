@@ -1,0 +1,237 @@
+:root {
+    --color-accent: oklch(65% 50% 0);
+    color-scheme: light dark
+    }
+
+body {
+    /* Set line height to 1.5 times the font size
+         and use the OS’s UI font as the website font
+       */
+    accent-color: var(--color-accent);
+    font: 100%/1.5 system-ui;
+    width:90%;
+    margin-inline: auto;
+    padding: 3em;
+
+  }
+
+.color-scheme {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 80%;
+  font-family: inherit;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+/* 
+----------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------- NAVIGATION BAR -----------------------------------------------------
+*/
+
+nav {
+  display: flex;
+  margin-bottom: 1em;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+   --border-color: oklch(50% 10% 200 / 40%);
+  border-bottom-color: var(--border-color);
+  
+
+  ul, 
+  ul li {
+      display: contents;
+  }
+
+  a {
+      flex: 1;
+      text-decoration: none;
+      color: inherit;
+      text-align: center;
+      padding: 0.5em;
+      transition: all 0.3s ease;
+      
+      &.current{
+          flex: 1;
+          border-bottom-width: 0.4em;
+          padding-bottom: 0.2em;
+          border-bottom-color: var(--color-accent);
+      }
+
+      &:hover{
+          border-bottom: 0.4em solid var(--color-accent);
+          background-color: color-mix(in oklch, var(--color-accent), canvas 85%);
+          padding-bottom: 0.2em;
+      }
+  }
+
+}
+
+
+
+h3 {
+  font-size: 20px;
+  margin-bottom: 15px;
+  text-align: top;
+}
+
+#toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  width:400px;
+  margin: 20px;
+  gap: 10px;
+}
+
+#dots-container {
+  display: flex;
+  justify-content: space-evenly;
+  width: 300px;
+  gap: 10px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  background-color: grey;
+  border-radius: 50%;
+  display: space-between;
+}
+
+.dot.active {
+  background-color: red;
+}
+
+button {
+  background: none;
+  border: 1px solid black;
+  font-size: 14px;
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: white;
+  transition: 0.2s;
+}
+
+button:hover {
+  background-color: lightgrey;
+}
+#arrow-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.chart-text-container {
+  width: 250px;
+  padding-left: 10px;
+  font-size: 16px;
+  top:-30px;
+  text-align: left;
+}
+
+/* Ensure text is positioned to the right or left */
+
+#arrow-svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+/* Container */
+
+#container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: auto;
+}
+
+#main-container {
+  flex: 2;
+  position: fixed;
+  right: 0;
+  top: 100px;  /* Push down to prevent overlap */
+  width: 55%;
+  height: calc(100vh - 80px); /* Adjust height */
+  overflow-y: auto;
+  background: transparent;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+
+#charts-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 20px;
+  width: 90%;
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+#body_image {
+  display: block;
+  max-width: 500px;
+  margin: auto;
+}
+
+.pie-chart-container {
+  width: 200px;
+  height: 200px;
+  background: transparent;
+  box-shadow: 0px 2px 4px rgba(110, 110, 110, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+
+
+/* Legend */
+
+#legend {
+  position: relative;
+  margin-top: 20px;
+  background: transparent;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+
+/* Scrolling styles */
+
+#scrolly {
+  flex: 1;
+  max-width: 35%;
+  padding-right: 30px;
+  z-index: 5;
+}
+
+
+#scrolly-overlay {
+  position: relative;
+  z-index: 10;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.step {
+  margin: 0 auto 4rem auto;
+  padding: 2rem;
+  background: transparent;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(97, 97, 97, 0.1);
+}
