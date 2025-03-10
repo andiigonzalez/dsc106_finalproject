@@ -21,6 +21,11 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("width", "100%")
         .style("max-width", "1400px")
         .style("margin", "0 auto");
+    const toggleContainer = mainContainer.append("div")
+        .attr("id", "toggle-container")
+        .style("display", "flex")
+        .style("justify-content", "center")
+        .style("margin-bottom", "20px");
 
     const visualizationWrapper = mainContainer.append("div")
         .attr("id", "visualization-wrapper")
@@ -30,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("width", "100%")
         .style("position", "relative")
         .style("margin-top", "10px")
-        .style("height", "900px");
+        .style("height", "1600px");
 
 
     const leftChartsContainer = visualizationWrapper.append("div")
@@ -40,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("justify-content", "flex-start")
         .style("width", "30%")
         .style("padding-right", "20px")
+        .style("gap", "40px")
         .style("z-index", "1");
 
     const centerContainer = visualizationWrapper.append("div")
@@ -47,9 +53,8 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("display", "flex")
         .style("justify-content", "center")
         .style("align-items", "center")
-        .style("width", "40%") // Adjust as needed for your SVG size
-        .style("height", "1200px")
-        .style("z-index", "0")
+        .style("width", "60%") // Adjust as needed for your SVG size
+        .style("height", "100%")
         .style("overflow", "visible"); // Adjust as needed for your SVG size
 
     const rightChartsContainer = visualizationWrapper.append("div")
@@ -58,6 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("flex-direction", "column")
         .style("justify-content", "flex-start")
         .style("width", "30%")
+        .style("gap", "40px") 
         .style("padding-left", "20px")
         .style("z-index", "1");
 
@@ -100,11 +106,11 @@ document.addEventListener("DOMContentLoaded", function () {
             const svgContainer = centerContainer.append("div")
                 .attr("id", "svg-container")
                 .style("width", "100%")
-                .style("display", "flex")
                 .style("height", "100%")
                 .style("justify-content", "center")
-                .style("z-index", "0")
+                .style("position", "relative")
                 .style("align-items", "center");
+
 
 
             let importedNode = document.importNode(xml.documentElement, true);
@@ -112,8 +118,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
             importedNode.setAttribute("preserveAspectRatio", "xMidYMid meet");
             importedNode.setAttribute("width", "100%");
-            importedNode.setAttribute("height", "1000px");
-            importedNode.setAttribute("viewBox", "0 0 400 800"); // Adjust viewBox to match your SVG content
+            importedNode.setAttribute("height", "90%");
+            importedNode.setAttribute("viewBox",  "-95 130 400 550");
+            // "viewbox" (min-x, min-y, width, height)
+            // to move right set min-x smaller
             
             svgContainer.node().appendChild(importedNode);
             setTimeout(() => {
@@ -153,20 +161,20 @@ document.addEventListener("DOMContentLoaded", function () {
             .style("flex-direction", "column")
             .style("align-items", "center")
             .style("justify-content", "center")
-            .style("margin", "15px 0")
+            .style("margin", "10px 0")
             .style("padding", "10px")
             .style("background", "rgba(255, 255, 255, 0.8)")
             .style("border-radius", "8px")
             .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
-            .style("width", "100%")
-            .style("height", "300px")
+            .style("width", "115%")
+            .style("height", "320px")
             .style("position", "relative")
-            .style("margin", "5px auto");
+            .style("margin", "3px auto");
             
         
         container.append("h4")
             .text(pos.label)
-            .style("margin", "0 0 10px 0")
+            .style("margin", "0 0 1px 0")
             .style("font-size", "14px");
         
         container.append("img")
@@ -182,17 +190,16 @@ document.addEventListener("DOMContentLoaded", function () {
             .style("display", "flex")
             .style("justify-content", "center")
             .style("align-items", "center")
-            .style("margin", "5px auto")
+            .style("margin", "4px auto")
             .style("position", "relative")
-            .style("margin", "5px auto")
      
         
         container.append("div")
             .attr("class", "chart-text")
             .attr("id", `text-${pos.id}`)
             .style("font-size", "14px")
-            .style("margin-top", "10px")
-            .style("height", "40px")
+            .style("margin-top", "4px")
+            .style("margin-bottom", "8px")
             .style("text-align", "center");
     }
 
@@ -266,7 +273,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 { label: "Other Surgeries", value: totalSurgeries - total, color: "lightgrey" }
             ];
             color = "red";
-            textContent = `Out of all surgeries, <b style="color:${color}"> ${optype}</b> constituted <b style="color:${color}">${percent}%</b>.`;
+            textContent = `<b style="color:${color}"> ${optype}</b> surgeries constituted <b style="color:${color}">${percent}%</b> of <b>all</b> surgeries.`;
         } else if (currentState === 1) {
             let percent = total === 0 ? 0 : Math.round((totalCancer / total) * 100);
             data = [
@@ -274,7 +281,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 { label: "Other", value: total - totalCancer || 1, color: "lightgrey" }
             ];
             color = "orange";
-            textContent = `Out of all <b style="color:${color}">${optype}</b> surgeries, <b style="color:${color}">${percent}%</b> were cancer diagnoses.`;
+            textContent = `<b style="color:${color}">${percent}%</b> of all all <b style="color:${color}">${optype}</b> surgery were <b style="color:${color}">cancer</b> diagnoses.`;
         } else if (currentState === 2)  {
             // Third toggle state: Split Cancer into Male/Female directly
             let percentMale = totalCancer === 0 ? 0 : Math.round((maleCancer / totalCancer) * 100);
@@ -371,10 +378,10 @@ document.addEventListener("DOMContentLoaded", function () {
             .attr("transform", d => {
                 let angle = (d.startAngle + d.endAngle) / 2 - Math.PI / 2; // Midpoint of slice
                 let isLargest = d.data.value === d3.max(data, d => d.value);
-                let offset = isLargest ? radius * 0.4 : radius * 0.8;
-                let x = Math.cos(angle) * offset;
-                let y = Math.sin(angle) * offset;
-                return `translate(${x}, ${y})`;
+                let offset = isLargest ? radius * 0.5 : radius * 1.1;
+                let x = Math.cos(angle)* offset ;
+                let y = (Math.sin(angle+0.5) * offset);
+                return `translate(${x+90}, ${y+95})`;
             })
             .attr("text-anchor", "middle")
             .attr("dy", "0.35em")
