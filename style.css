@@ -9,7 +9,7 @@ body {
        */
     accent-color: var(--color-accent);
     font: 100%/1.5 system-ui;
-    width:90%;
+    width:95%;
     margin-inline: auto;
     padding: 3em;
 
@@ -70,25 +70,33 @@ nav {
 
 }
 
+h1{
+  font-size: 24px;
+  text-align: center;
+  align-items: center;
 
+}
 
 h3 {
   font-size: 20px;
   margin-bottom: 15px;
   text-align: top;
+  align-items: center;
 }
 
 #toggle-container {
   display: flex;
   align-items: center;
+  text-align: center;
   justify-content: space-evenly;
-  width:400px;
+  width:800px;
   margin: 20px;
   gap: 10px;
 }
 
 #dots-container {
   display: flex;
+  align-items: center;
   justify-content: space-evenly;
   width: 300px;
   gap: 10px;
@@ -128,15 +136,7 @@ button:hover {
   pointer-events: none;
 }
 
-.chart-text-container {
-  width: 250px;
-  padding-left: 10px;
-  font-size: 16px;
-  top:-30px;
-  text-align: left;
-}
 
-/* Ensure text is positioned to the right or left */
 
 #arrow-svg {
   position: absolute;
