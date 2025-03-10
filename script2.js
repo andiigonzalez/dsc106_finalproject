@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .style("top", "0")
       .style("left", "0")
       .style("pointer-events", "none")
-      .style("z-index", "2");
+      .style("z-index", "5");
 
 
     const leftPositions = [
@@ -134,6 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 
                 // Initialize pie charts now that containers exist
+                drawAllArrows();
                 createPieCharts();
                 updateAll();
         
@@ -392,69 +393,72 @@ document.addEventListener("DOMContentLoaded", function () {
 
         text.exit().remove();
     }
-
+    function getSVGCoordinates(svgElement) {
+        let rect = svgElement.getBoundingClientRect();
+        return {
+            x: rect.left + window.scrollX,
+            y: rect.top + window.scrollY
+        };
+    }
+    function getChartCoordinates(chartContainer) {
+        let rect = chartContainer.getBoundingClientRect();
+        return {
+            x: rect.left + rect.width / 2 + window.scrollX,
+            y: rect.top + rect.height / 2 + window.scrollY
+        };
+    }
     
-    function showOrganConnection(pos) {
-        arrowsSvg.selectAll("*").remove();
-
-        if (!pos.element) return;
-
+    
+    function drawAllArrows() {
+        arrowsSvg.selectAll("*").remove(); // Clear previous arrows
+    
         arrowsSvg.append("defs").append("marker")
             .attr("id", "arrowhead")
             .attr("viewBox", "0 -5 10 10")
-            .attr("refX", 8)
+            .attr("refX", 10)  
             .attr("refY", 0)
             .attr("markerWidth", 6)
             .attr("markerHeight", 6)
             .attr("orient", "auto")
             .append("path")
             .attr("d", "M0,-5L10,0L0,5")
-            .attr("fill", "#555");
-
- 
-        if (pos.element) {
-            d3.select(pos.element)
-                .style("filter", "drop-shadow(0 0 5px red)")
-                .style("opacity", 1);
+            .attr("fill", "black"); // **Bright red arrowheads**
+    
+            positions.forEach(pos => {
+                let organSVGPath;
+        
+                // **Manually Assign Organ Path**
+                if (pos.id === "Urinary") {
+                    organSVGPath = document.querySelector("#body-svg > path:nth-child(838)");
+                } else if (pos.id === "Cardiovascular") {
+                    organSVGPath = document.querySelector("#body-svg > path:nth-child(812)");
+                } else if (pos.id === "Hepatic") {
+                    organSVGPath = document.querySelector("#body-svg > path:nth-child(319)");
+                } else {
+                    organSVGPath = pos.element;
+                }
+        
+                if (!organSVGPath) {
+                    console.warn(`No valid SVG path found for ${pos.id}`);
+                    return;
+                }
+        
+                let organPos = getSVGCoordinates(organSVGPath);
+                let chartContainer = document.getElementById(`chart-container-${pos.id}`);
+                let chartPos = getChartCoordinates(chartContainer);
+        
+                // **Draw the Arrow**
+                arrowsSvg.append("path")
+                    .attr("d", `M${organPos.x},${organPos.y} L${chartPos.x},${chartPos.y}`)
+                    .attr("stroke", "red")
+                    .attr("stroke-width", 4) // **Thicker arrows**
+                    .attr("stroke-dasharray", "8,4") // **Dashed**
+                    .attr("marker-end", "url(#arrowhead)")
+                    .style("opacity", 1);
+            });
         }
-
-
-        const centerRect = centerContainer.node().getBoundingClientRect();
-        const organRect = pos.element.getBoundingClientRect();
-        const chartContainer = document.getElementById(`chart-container-${pos.id}`);
-        const chartRect = chartContainer.getBoundingClientRect();
         
-        // Calculate coordinates relative to the arrowsSvg
-        const organX = organRect.left + organRect.width/2 - centerRect.left;
-        const organY = organRect.top + organRect.height/2 - centerRect.top;
-        const chartX = chartRect.left + chartRect.width/2 - centerRect.left;
-        const chartY = chartRect.top + chartRect.height/2 - centerRect.top;
-        
-  
-        arrowsSvg.append("path")
-            .attr("d", `M${organX},${organY} L${chartX},${chartY}`)
-            .attr("fill", "black")
-            .attr("stroke", "red")
-            .attr("stroke-width", 2)
-            .attr("stroke-dasharray", "5,3")
-            .attr("marker-end", "url(#arrowhead)")
-            .style("opacity", 0.8);
-    }
-
- 
-    function hideOrganConnections() {
-        arrowsSvg.selectAll("*").remove();
-        
-        // Remove highlighting from all organs
-        positions.forEach(pos => {
-            if (pos.element) {
-                d3.select(pos.element)
-                    .style("filter", null)
-                    .style("opacity", null);
-            }
-            
-        });
-    }
+    
 
     function updateAll() {
         let totalSurgeries = d3.sum(Object.values(surgeryData));
@@ -525,20 +529,14 @@ document.addEventListener("DOMContentLoaded", function () {
             .html(d => `<span style="background-color:${d.color}; width:16px; height:16px; margin-right:5px; display:inline-block; border-radius:50%;"></span>${d.label}`);
     }
 
-    // Add window resize handler
-    window.addEventListener("resize", () => {
-        hideOrganConnections();
-    });
 
     nextButton.addEventListener("click", function () {
         currentState = (currentState + 1) % 3;
         updateAll();
-        hideOrganConnections();
     });
 
     previousButton.addEventListener("click", function () {
         currentState = (currentState - 1 + 3) % 3;
         updateAll();
-        hideOrganConnections();
     });
 });
