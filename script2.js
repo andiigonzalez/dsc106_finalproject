@@ -21,11 +21,13 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("width", "100%")
         .style("max-width", "1400px")
         .style("margin", "0 auto");
+        
     const toggleContainer = mainContainer.append("div")
         .attr("id", "toggle-container")
         .style("display", "flex")
         .style("justify-content", "center")
-        .style("margin-bottom", "20px");
+        .style("margin-bottom", "20px")
+        .style("margin-top", "10px");
 
     const visualizationWrapper = mainContainer.append("div")
         .attr("id", "visualization-wrapper")
@@ -47,6 +49,16 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("padding-right", "20px")
         .style("gap", "40px")
         .style("z-index", "1");
+
+    const descriptionContainer = leftChartsContainer.insert("div", ":first-child")
+        .attr("id", "description-container")
+        .style("background", "rgba(255, 255, 255, 0.8)")
+        .style("padding", "10px")
+        .style("border-radius", "8px")
+        .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
+        .style("margin-bottom", "20px")
+        .style("font-size", "14px")
+        .style("text-align", "center");
 
     const centerContainer = visualizationWrapper.append("div")
         .attr("id", "center-container")
@@ -154,6 +166,25 @@ document.addEventListener("DOMContentLoaded", function () {
             }, 500);
         });
     });
+
+    function updateDescription() {
+        let totalSurgeries = d3.sum(Object.values(surgeryData));
+        let descriptionText = "";
+
+        if (currentState === 0) {
+            descriptionText = `A total of <b>${totalSurgeries}</b> surgeries were recorded. This section provides an overview of the distribution across different organ systems.`;
+        } else if (currentState === 1) {
+            let maxType = Object.entries(surgeryData).reduce((a, b) => (a[1] > b[1] ? a : b), ["Unknown", 0]);
+            let percentage = Math.round((maxType[1] / totalSurgeries) * 100);
+            descriptionText = `Out of <b>${totalSurgeries}</b> surgeries, the majority were <b>${maxType[0]}</b>, comprising <b>${percentage}%</b> of the total. These included procedures related to the <b>colon, intestines, stomach, and pancreas</b>.`;
+        } else if (currentState === 2) {
+            let totalCancerCases = d3.sum(Object.values(cancerData));
+            let percentCancer = Math.round((totalCancerCases / totalSurgeries) * 100);
+            descriptionText = `Cancer-related surgeries accounted for <b>${percentCancer}%</b> of all procedures. The most common cancer surgeries affected the <b>colorectal, hepatic, and reproductive systems</b>.`;
+        }
+
+        descriptionContainer.html(descriptionText);
+    }
 
     function createChartContainer(parentContainer, pos) {
         const container = parentContainer.append("div")
@@ -282,7 +313,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 { label: "Other", value: total - totalCancer || 1, color: "lightgrey" }
             ];
             color = "orange";
-            textContent = `<b style="color:${color}">${percent}%</b> of all all <b style="color:${color}">${optype}</b> surgery were <b style="color:${color}">cancer</b> diagnoses.`;
+            textContent = `<b style="color:${color}">${percent}%</b> of all <b style="color:${color}">${optype}</b> surgery were <b style="color:${color}">cancer</b> diagnoses.`;
         } else if (currentState === 2)  {
             // Third toggle state: Split Cancer into Male/Female directly
             let percentMale = totalCancer === 0 ? 0 : Math.round((maleCancer / totalCancer) * 100);
@@ -465,6 +496,7 @@ document.addEventListener("DOMContentLoaded", function () {
         updateTitle();
         updateLegend();
         updateDots();
+        updateDescription();
         
         positions.forEach(pos => {
             updatePieChart(pos.id, totalSurgeries);
