@@ -371,7 +371,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .attr("x", (d, i) => i === 0 ? 0 : d3.sum(data.slice(0, i), d => d.value) / referenceTotal * totalWidth)
             .attr("width", d => (d.value / referenceTotal) * totalWidth)
             .attr("height", "25")
-            .attr("ry", 8)  // Rounds the corners verticaally
+            .attr("ry", 2)  // Rounds the corners verticaally
             .attr("fill", d => d.color);
 
         bars.exit().remove(); // Ensure old bars are properly removed
