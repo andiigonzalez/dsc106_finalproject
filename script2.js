@@ -14,81 +14,90 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("id", "status-title")
         .style("text-align", "center")
     
+   
     const mainContainer = d3.select("#main-container")
         .style("display", "flex")
         .style("flex-direction", "column")
         .style("align-items", "center")
+        .style("height", "100%")
         .style("width", "100%")
-        .style("max-width", "1400px")
         .style("margin", "0 auto");
-        
+
+    const descriptionContainer =  mainContainer.append("div")
+        .attr("id", "description-container")
+        .style("display", "flex")
+        .style("flex-direction", "column")
+        .style("align-items", "center")
+        .style("width", "60%")
+        .style("overflow-y", "auto") // Enable scrolling
+        .style("padding", "20px")
+        .style("gap", "10px")
+        .style("font-size", "18px");
+
+    descriptionContainer.append("h3")
+        .attr("id", "description-title")
+        .style("align-items", "center")
+        .style("margin-bottom", "10px")
+        .style("font-size", "24px")
+        .style("font-weight", "bold");
+    
+    descriptionContainer.append("div")
+        .attr("id", "description-text")
+        .style("font-size", "18px");
+
     const toggleContainer = mainContainer.append("div")
         .attr("id", "toggle-container")
         .style("display", "flex")
-        .style("justify-content", "center")
-        .style("margin-bottom", "20px")
-        .style("margin-top", "10px");
+        .style("justify-content", "space-between")
+        .style("align-items", "center")
+        .style("width", "150%")
+        .style("top", "10px") // Fixed positioning for centering
+        .style("left", "60%")
+        .style("transform", "translateX(-50%)")
+        .style("z-index", "10");
 
     const visualizationWrapper = mainContainer.append("div")
         .attr("id", "visualization-wrapper")
         .style("display", "flex")
-        .style("flex-direction", "row") // Ensure horizontal layout
-        .style("justify-content", "space-between") 
         .style("width", "100%")
+        .style("gap", "10px")
         .style("position", "relative")
-        .style("margin-top", "10px")
-        .style("height", "1600px");
-
+        .style("margin-top", "20px")
+        .style("height", "calc(100vh - 60px)") // Adjust for header/toggle height
+        .style("overflow", "hidden");
 
     const leftChartsContainer = visualizationWrapper.append("div")
         .attr("id", "left-charts-container")
         .style("display", "flex")
         .style("flex-direction", "column")
         .style("justify-content", "flex-start")
-        .style("width", "30%")
-        .style("padding-right", "20px")
-        .style("gap", "40px")
-        .style("z-index", "1");
-
-    const descriptionContainer = leftChartsContainer.insert("div", ":first-child")
-        .attr("id", "description-container")
-        .style("background", "rgba(255, 255, 255, 0.8)")
-        .style("padding", "10px")
-        .style("border-radius", "8px")
-        .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
-        .style("margin-bottom", "20px")
-        .style("font-size", "14px")
-        .style("text-align", "center");
+        .style("width", "100%")
+        .style("height", "100%")
+        .style("overflow", "hidden") // No extra scrolling
+        .style("gap", "20px")
+        .style("top", "-10px");
 
     const centerContainer = visualizationWrapper.append("div")
         .attr("id", "center-container")
         .style("display", "flex")
         .style("justify-content", "center")
         .style("align-items", "center")
-        .style("width", "60%") // Adjust as needed for your SVG size
-        .style("height", "100%")
-        .style("overflow", "visible"); // Adjust as needed for your SVG size
+        .style("width", "100%")
+        .style("height", "110%")
+        .style("top", "-10px")
+        .style("overflow", "visible");
 
+    /*** ✅ Right Charts Container (Fixed) ***/
     const rightChartsContainer = visualizationWrapper.append("div")
         .attr("id", "right-charts-container")
         .style("display", "flex")
         .style("flex-direction", "column")
         .style("justify-content", "flex-start")
-        .style("width", "30%")
-        .style("gap", "40px") 
-        .style("padding-left", "20px")
-        .style("z-index", "1");
+        .style("width", "100%")
+        .style("height", "100%")
+        .style("overflow", "hidden") // Prevent extra scrolling
+        .style("gap", "20px");
 
-
-    const arrowsSvg = centerContainer.append("svg")
-      .attr("id", "arrows-svg")
-      .attr("width", "100%")
-      .attr("height", "100%")
-      .style("position", "absolute")
-      .style("top", "0")
-      .style("left", "0")
-      .style("pointer-events", "none")
-      .style("z-index", "5");
 
 
     const leftPositions = [
@@ -110,12 +119,9 @@ document.addEventListener("DOMContentLoaded", function () {
     leftPositions.forEach(pos => createChartContainer(leftChartsContainer, pos));
     rightPositions.forEach(pos => createChartContainer(rightChartsContainer, pos));
 
-    d3.csv("sugeries.csv").then(function (data) {
-        processData(data);
+    d3.xml("Images/only_organs_removebg.svg").then(function (xml) {
 
-        d3.xml("Images/only_organs_removebg.svg").then(function (xml) {
-
-            const svgContainer = centerContainer.append("div")
+        const svgContainer = centerContainer.append("div")
                 .attr("id", "svg-container")
                 .style("width", "100%")
                 .style("height", "100%")
@@ -123,67 +129,52 @@ document.addEventListener("DOMContentLoaded", function () {
                 .style("position", "relative")
                 .style("align-items", "center");
 
-
-
-            let importedNode = document.importNode(xml.documentElement, true);
-            importedNode.id = "body-svg";
-
-            importedNode.setAttribute("preserveAspectRatio", "xMidYMid meet");
-            importedNode.setAttribute("width", "100%");
-            importedNode.setAttribute("height", "90%");
-            importedNode.setAttribute("viewBox",  "-95 130 400 550");
-            // "viewbox" (min-x, min-y, width, height)
-            // to move right set min-x smaller
-            
-            svgContainer.node().appendChild(importedNode);
-            setTimeout(() => {
-                // Find and store organ elements
-                positions.forEach(pos => {
-                    pos.element = document.getElementById(pos.organId);
-                    if (!pos.element) {
-                        console.warn(`Organ element #${pos.organId} not found`);
-                    }
-                });
-                
-                // Initialize pie charts now that containers exist
-                drawAllArrows();
-                createPieCharts();
-                updateAll();
-        
-
-                
-              
-                positions.forEach(pos => {
-                    d3.select(`#chart-container-${pos.id}`)
-                        .style("cursor", "pointer")
-                        .on("mouseenter", () => {
-                            showOrganConnection(pos);
-                        })
-                        .on("mouseleave", () => {
-                            hideOrganConnections();
-                        });
-                });
-            }, 500);
-        });
+        let importedNode = document.importNode(xml.documentElement, true);
+        importedNode.id = "body-svg";
+        importedNode.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        importedNode.setAttribute("width", "100%");
+        importedNode.setAttribute("height", "100%"); // Fit within container
+        importedNode.setAttribute("viewBox", "-100 210 400 470");
+    
+        svgContainer.node().appendChild(importedNode);
+        setTimeout(() => {
+            positions.forEach(pos => {
+                pos.element = document.getElementById(pos.organId);
+                if (!pos.element) {
+                    console.warn(`Organ element #${pos.organId} not found`);
+                }
+            });
+            createPieCharts();
+            updateAll();
+        }, 500);
     });
 
-    function updateDescription() {
+
+
+    function updateVisualization() {
         let totalSurgeries = d3.sum(Object.values(surgeryData));
+        let titleText = "";
         let descriptionText = "";
+        
 
         if (currentState === 0) {
-            descriptionText = `A total of <b>${totalSurgeries}</b> surgeries were recorded. This section provides an overview of the distribution across different organ systems.`;
+            titleText = "Surgery Distributions";
+            descriptionText = `Out of <b>${totalSurgeries}</b> surgeries in the dataset, colorectal was the most frequent at <b>XX%</b>. Other common procedures included digestive and hepatic system surgeries.`;
         } else if (currentState === 1) {
-            let maxType = Object.entries(surgeryData).reduce((a, b) => (a[1] > b[1] ? a : b), ["Unknown", 0]);
-            let percentage = Math.round((maxType[1] / totalSurgeries) * 100);
-            descriptionText = `Out of <b>${totalSurgeries}</b> surgeries, the majority were <b>${maxType[0]}</b>, comprising <b>${percentage}%</b> of the total. These included procedures related to the <b>colon, intestines, stomach, and pancreas</b>.`;
-        } else if (currentState === 2) {
+            titleText = "Cancer vs Non-Cancer Diagnoses by Surgery";
             let totalCancerCases = d3.sum(Object.values(cancerData));
             let percentCancer = Math.round((totalCancerCases / totalSurgeries) * 100);
             descriptionText = `Cancer-related surgeries accounted for <b>${percentCancer}%</b> of all procedures. The most common cancer surgeries affected the <b>colorectal, hepatic, and reproductive systems</b>.`;
+        } else if (currentState === 2) {
+            titleText = "Male vs Female Cancer Diagnoses";
+            descriptionText = `Among cancer surgeries, <b>XX%</b> were in male patients and <b>XX%</b> in female patients. The highest rates of cancer diagnoses in men were seen in the digestive system, while in women, reproductive system surgeries dominated.`;
         }
 
-        descriptionContainer.html(descriptionText);
+        d3.select("#description-title").html(titleText);
+        d3.select("#description-text").html(descriptionText);
+
+        // Update pie charts to match the new state
+        updatePieCharts();
     }
 
     function createChartContainer(parentContainer, pos) {
@@ -193,39 +184,35 @@ document.addEventListener("DOMContentLoaded", function () {
             .style("flex-direction", "column")
             .style("align-items", "center")
             .style("justify-content", "center")
-            .style("margin", "10px 0")
             .style("padding", "10px")
             .style("background", "rgba(255, 255, 255, 0.8)")
             .style("border-radius", "8px")
             .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
-            .style("width", "115%")
-            .style("height", "320px")
-            .style("position", "relative")
-            .style("margin", "3px auto");
-            
-        
+            .style("width", "100%")
+            .style("height", "5500px")
+            .style("overflow", "visible"); // Prevent chart overflow
+    
         container.append("h4")
             .text(pos.label)
             .style("margin", "0 0 1px 0")
             .style("font-size", "14px");
-        
+    
         container.append("img")
             .attr("src", `Images/${pos.organId}.png`)
             .attr("width", "60px")
             .attr("height", "60px")
             .style("margin-bottom", "2px");
-        
+    
         container.append("div")
             .attr("id", `chart-${pos.id}`)
-            .style("width", "200px")
-            .style("height", "200px")
+            .style("width", "200px") // Adjusted to fit container
+            .style("height", "200px") // Reduced height to fit
             .style("display", "flex")
             .style("justify-content", "center")
             .style("align-items", "center")
             .style("margin", "4px auto")
-            .style("position", "relative")
-     
-        
+            .style("position", "relative");
+    
         container.append("div")
             .attr("class", "chart-text")
             .attr("id", `text-${pos.id}`)
@@ -234,6 +221,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .style("margin-bottom", "8px")
             .style("text-align", "center");
     }
+   
 
 
     function processData(data) {
@@ -281,6 +269,7 @@ document.addEventListener("DOMContentLoaded", function () {
             svgElements[pos.id] = svg;
     
             updatePieChart(pos.id, totalSurgeries);
+            updateVisualization() 
         });
     }
 
@@ -299,6 +288,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let data;
         if (currentState === 0) {
+            titleText = "Surgery Distributions";
             let percent = Math.round((total / totalSurgeries) * 100);
             data = [
                 { label: optype, value: total || 1, color: "red" },
@@ -306,7 +296,10 @@ document.addEventListener("DOMContentLoaded", function () {
             ];
             color = "red";
             textContent = `<b style="color:${color}"> ${optype}</b> surgeries constituted <b style="color:${color}">${percent}%</b> of <b>all</b> surgeries.`;
+            descriptionText = `Out of <b>${totalSurgeries}</b> surgeries in the dataset, ${maxSurgeryType} was the most frequent at <b>${maxPercent}%</b>. Other common procedures included digestive at  and hepatic system surgeries.`;
         } else if (currentState === 1) {
+        } else if (currentState === 1) {
+            titleText = "Cancer vs Non-Cancer Diagnoses by Surgery";
             let percent = total === 0 ? 0 : Math.round((totalCancer / total) * 100);
             data = [
                 { label: "Cancer", value: totalCancer || 1, color: "orange" },
@@ -314,6 +307,9 @@ document.addEventListener("DOMContentLoaded", function () {
             ];
             color = "orange";
             textContent = `<b style="color:${color}">${percent}%</b> of all <b style="color:${color}">${optype}</b> surgery were <b style="color:${color}">cancer</b> diagnoses.`;
+            descriptionText = `Cancer-related surgeries accounted for <b>${percentCancer}%</b> of all procedures. That is <b>${totalCancer}</b> out of ${total}. The most common cancer surgeries affected the <b>colorectal, hepatic, and reproductive systems</b>.
+            The cancer diagnoses included the words such as: carcinoma, sarcoma, tumor, neoplasm, cancer,leukemia, lymphoma, metastasis... Although the cancer diagnosis may not have been the specific cause for the surgery, it was the underlying circumstance for the individual`;
+        } else if (currentState === 2) {
         } else if (currentState === 2)  {
             // Third toggle state: Split Cancer into Male/Female directly
             let percentMale = totalCancer === 0 ? 0 : Math.round((maleCancer / totalCancer) * 100);
@@ -325,6 +321,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ];
             textContent = `Women made up <b style="color:pink">${percentFemale}%</b> and men <b style="color:lightblue">${percentMale}%</b> of the cancer diagnoses.`;
         } else if (currentState === 3) {
+            titleText = "Gender and Cancer Diagnoses";
             data1 = [
                 { label: optype, value: total || 1, color: "red" },
                 { label: "Other Surgeries", value: totalSurgeries - total, color: "lightgrey" }
@@ -344,10 +341,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 { label: "Female Cases Cancer", value: percentCancerMale  || 1, color: "lightblue" },
             ];
             color3 = "pink";
+            descriptionText = `Among cancer surgeries, <b>${percentMale}%</b> were in male patients and <b>${percentFemale}%</b> in female patients. The highest rates of cancer diagnoses in men were seen in the digestive system, while in women, reproductive system surgeries dominated.`;
         }
+    
 
             
-        
+        d3.select("#description-title").html(titleText);
+        d3.select("#description-text").html(descriptionText);
         d3.select(`#text-${optype}`).html(textContent);
 
         let pie = d3.pie().value(d => d.value);
@@ -424,71 +424,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         text.exit().remove();
     }
-    function getSVGCoordinates(svgElement) {
-        let rect = svgElement.getBoundingClientRect();
-        return {
-            x: rect.left + window.scrollX,
-            y: rect.top + window.scrollY
-        };
-    }
-    function getChartCoordinates(chartContainer) {
-        let rect = chartContainer.getBoundingClientRect();
-        return {
-            x: rect.left + rect.width / 2 + window.scrollX,
-            y: rect.top + rect.height / 2 + window.scrollY
-        };
-    }
-    
-    
-    function drawAllArrows() {
-        arrowsSvg.selectAll("*").remove(); // Clear previous arrows
-    
-        arrowsSvg.append("defs").append("marker")
-            .attr("id", "arrowhead")
-            .attr("viewBox", "0 -5 10 10")
-            .attr("refX", 10)  
-            .attr("refY", 0)
-            .attr("markerWidth", 6)
-            .attr("markerHeight", 6)
-            .attr("orient", "auto")
-            .append("path")
-            .attr("d", "M0,-5L10,0L0,5")
-            .attr("fill", "black"); // **Bright red arrowheads**
-    
-            positions.forEach(pos => {
-                let organSVGPath;
-        
-                // **Manually Assign Organ Path**
-                if (pos.id === "Urinary") {
-                    organSVGPath = document.querySelector("#body-svg > path:nth-child(838)");
-                } else if (pos.id === "Cardiovascular") {
-                    organSVGPath = document.querySelector("#body-svg > path:nth-child(812)");
-                } else if (pos.id === "Hepatic") {
-                    organSVGPath = document.querySelector("#body-svg > path:nth-child(319)");
-                } else {
-                    organSVGPath = pos.element;
-                }
-        
-                if (!organSVGPath) {
-                    console.warn(`No valid SVG path found for ${pos.id}`);
-                    return;
-                }
-        
-                let organPos = getSVGCoordinates(organSVGPath);
-                let chartContainer = document.getElementById(`chart-container-${pos.id}`);
-                let chartPos = getChartCoordinates(chartContainer);
-        
-                // **Draw the Arrow**
-                arrowsSvg.append("path")
-                    .attr("d", `M${organPos.x},${organPos.y} L${chartPos.x},${chartPos.y}`)
-                    .attr("stroke", "red")
-                    .attr("stroke-width", 4) // **Thicker arrows**
-                    .attr("stroke-dasharray", "8,4") // **Dashed**
-                    .attr("marker-end", "url(#arrowhead)")
-                    .style("opacity", 1);
-            });
-        }
-        
     
 
     function updateAll() {
@@ -496,7 +431,7 @@ document.addEventListener("DOMContentLoaded", function () {
         updateTitle();
         updateLegend();
         updateDots();
-        updateDescription();
+        updateVisualization()
         
         positions.forEach(pos => {
             updatePieChart(pos.id, totalSurgeries);
@@ -571,4 +506,19 @@ document.addEventListener("DOMContentLoaded", function () {
         currentState = (currentState - 1 + 3) % 3;
         updateAll();
     });
+
+    descriptionContainer.node().addEventListener("scroll", function () {
+        let scrollY = descriptionContainer.node().scrollTop;
+        let containerHeight = descriptionContainer.node().scrollHeight - descriptionContainer.node().clientHeight;
+        let newState = Math.floor((scrollY / containerHeight) * 3); // Dividing scroll height into three states
+
+        if (newState !== currentState) {
+            currentState = newState;
+            updateVisualization();
+        }
+    });
+
+    /*** Initial Setup ***/
+    updateVisualization();
+
 });
