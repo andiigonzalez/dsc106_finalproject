@@ -1,63 +1,67 @@
-// Import Scrollama
-  
 document.addEventListener("DOMContentLoaded", function () {
     let currentState = 0;
-    let totalSurgeries = 0;
     let surgeryData = {};
     let cancerData = {};
     let genderData = {};
     let svgElements = {};
-    let width = 120, height = 120, radius = Math.min(width, height) / 2;
-    let scroller = scrollama();
-
+    let width = 150, height = 150, radius = Math.min(width, height) / 2;
+  
+    const steps = document.querySelectorAll(".step");
   
     let title = d3.select("#title").append("h2")
-      .attr("id", "status-title")
-      .style("text-align", "center")
+        .attr("id", "status-title")
+        .style("text-align", "center");
     
-    const mainContainer = d3.select("#main-container")   
-
-    // Create the center container for the body image
-    const centerContainer = mainContainer.append("div")
-      .attr("id", "center-container")
-      .attr("position", "relative")
-      .style("display", "flex")
-      .style("justify-content", "center")
-      .style("align-items", "center")
-      .style("width", "1100px") // Adjust as needed for your SVG size
-      .style("height", "500px"); // Adjust as needed for your SVG size
-
-    // Ensure charts-container exists
-    let chartsContainer = mainContainer.select("#charts-container");
-    if (chartsContainer.empty()) {
-        chartsContainer = mainContainer.append("div")
-            .attr("id", "charts-container")
-            .style("position", "relative")
-            .style("display", "grid")
-            .style("grid-template-columns", "repeat(2, 1fr)")
-            .style("grid-gap", "20px")
-            .style("width", "100%")
-            .style("max-width", "1200px")
-            .style("margin", "20px auto");
-    }
-
-    // Ensure body image exists
-    let bodyImage = mainContainer.select("#body_image");
-    if (bodyImage.empty()) {
-        bodyImage = mainContainer.append("img")
-        .attr("id", "body_image")
-        .attr("src", "Images/only_organs_nobg.png")
+    const mainContainer = d3.select("#main-container")
+        .style("display", "flex")
+        .style("flex-direction", "column")
+        .style("align-items", "center")
         .style("width", "100%")
-        .style("max-width", "500px")
-        .style("display", "block")
-        .style("margin", "auto")
-        .on("error", function () {
-            console.error("Error loading organ image! Check if Images/only_organs_nobg.png exists.");
-        });
-    }
+        .style("max-width", "1400px")
+        .style("margin", "0 auto");
 
-    // Debugging message
-    console.log("Charts container and body image initialized.");
+    const scroller = scrollama();
+
+    const visualizationWrapper = mainContainer.append("div")
+        .attr("id", "visualization-wrapper")
+        .style("display", "flex")
+        .style("flex-direction", "row") // Ensure horizontal layout
+        .style("justify-content", "space-between") 
+        .style("width", "100%")
+        .style("position", "relative")
+        .style("margin-top", "10px")
+        .style("height", "900px");
+
+
+    const leftChartsContainer = visualizationWrapper.append("div")
+        .attr("id", "left-charts-container")
+        .style("display", "flex")
+        .style("flex-direction", "column")
+        .style("justify-content", "flex-start")
+        .style("width", "30%")
+        .style("padding-right", "20px")
+        .style("z-index", "1");
+
+    const centerContainer = visualizationWrapper.append("div")
+    .attr("id", "center-container")
+    .style("display", "flex")
+    .style("justify-content", "center")
+    .style("align-items", "center")
+    .style("width", "40%") 
+    .style("height", "100vh") // Adjust height to fill viewport properly
+    .style("position", "relative")
+    .style("top", "0px") // Ensure it aligns with the top
+    .style("z-index", "0");
+
+    const rightChartsContainer = visualizationWrapper.append("div")
+        .attr("id", "right-charts-container")
+        .style("display", "flex")
+        .style("flex-direction", "column")
+        .style("justify-content", "flex-start")
+        .style("width", "30%")
+        .style("padding-left", "20px")
+        .style("z-index", "1");
+
 
     const arrowsSvg = centerContainer.append("svg")
       .attr("id", "arrows-svg")
@@ -68,98 +72,55 @@ document.addEventListener("DOMContentLoaded", function () {
       .style("left", "0")
       .style("pointer-events", "none")
       .style("z-index", "2");
-    
 
-    
-    const positions = [
-        { id: "Lymphatic-Endocrine", x: "-350px", y: "0.5px", label: "Lymphatic/Endocrine System", organId: "Thyroid", organName: "Thyroid" },
-        { id: "Cardiovascular", x: "450px", y: "0.5px", label: "Cardiovascular System", organId: "Heart", organName: "Heart" },
-        { id: "Digestive", x: "-300px", y: "15px", label: "Digestive System", organId: "Stomach", organName: "Stomach" },
-        { id: "Hepatic", x: "350px", y: "15px", label: "Hepatic System", organId: "Liver", organName: "Liver" },
-        { id: "Pancreatic-Billiary", x: "-300px", y: "8px", label: "Pancreatic/Billiary System", organId: "Pancreas", organName: "Pancreas" },
-        { id: "Colorectal", x: "-350px", y: "8px", label: "Colorectal System", organId: "Intestines", organName: "Intestines" },
-        { id: "Urinary", x: "-300px", y: "10px", label: "Urinary System", organId: "Kidneys", organName: "Kidneys" },
-        { id: "Reproductive", x: "0px", y: "30px", label: "Reproductive System", organId: "Female_RS", organName: "Reproductive" }
+
+    const leftPositions = [
+        { id: "Lymphatic-Endocrine", label: "Lymphatic/Endocrine System", organId: "Thyroid", organName: "Thyroid" },
+        { id: "Digestive", label: "Digestive System", organId: "Stomach", organName: "Stomach" },
+        { id: "Pancreatic-Billiary", label: "Pancreatic/Billiary System", organId: "Pancreas", organName: "Pancreas" },
+        { id: "Urinary", label: "Urinary System", organId: "Kidneys", organName: "Kidneys" }
     ];
- 
-    positions.forEach(pos => {
-        let container = d3.select(`#chart-container-${pos.id}`);
-        if (!container.empty()) {
-            console.warn(`Skipping duplicate container for ${pos.id}`);
-            return;  // Stop execution if the container already exists
-        } else {
-                console.warn(`Duplicate chart container detected for ${pos.id}, skipping creation.`);
-        }
-
-        container = chartsContainer.append("div")
-            .attr("id", `chart-container-${pos.id}`)
-            .attr("class", "chart-box");
-        
-        let chartDiv = container.select(`#chart-${pos.id}`);
-            if (chartDiv.empty()) {
-                chartDiv = container.append("div")
-                    .attr("id", `chart-${pos.id}`)
-                    .attr("class", "pie-chart-container")
-                    .style("width", "170px")
-                    .style("height", "170px");
-            }
-  
-        container.append("h4")
-            .text(pos.label)
-            .style("margin", "0 0 1px 0");
-
-        container.append("img")
-            .attr("src", `Images/${pos.organId}.png`)  
-            .attr("width", "60px")
-            .attr("height", "60px")
-            .style("margin-bottom", "2px");
     
-        container.append("div")
-            .attr("id", `chart-${pos.id}`)
-            .style("text-align", "center")
-            .style("align-items", "center")
-            .style("width", "170px")
-            .style("height", "170px");
+    const rightPositions = [
+        { id: "Cardiovascular", label: "Cardiovascular System", organId: "Heart", organName: "Heart" },
+        { id: "Hepatic", label: "Hepatic System", organId: "Liver", organName: "Liver" },
+        { id: "Colorectal", label: "Colorectal System", organId: "Intestines", organName: "Intestines" },
+        { id: "Reproductive", label: "Reproductive System", organId: "Female_RS", organName: "Reproductive" }
+    ];
 
-        container.append("div")
-            .attr("class", "chart-text")
-            .attr("id", `text-${pos.id}`)
-            .style("font-size", "12px")
-            .style("margin-bottom", "5px")
-            .style("height", "40px");
-    });
+    const positions = [...leftPositions, ...rightPositions];
 
+    leftPositions.forEach(pos => createChartContainer(leftChartsContainer, pos));
+    rightPositions.forEach(pos => createChartContainer(rightChartsContainer, pos));
 
-
-    d3.csv("sugeries.csv", d3.autoType).then(function (data) {
-        console.log("Raw Data Loaded:", data); // Debugging log
-
+    d3.csv("sugeries.csv").then(function (data) {
         processData(data);
-        console.log("Processed Data:", surgeryData, cancerData, genderData); // Debugging log
+        createPieCharts();
+        updateAll();
 
-        if (Object.keys(surgeryData).length === 0) {
-            console.error("Data processing failed, no surgeries found.");
-            return;
-        }
+        d3.xml("Images/only_organs_removebg.svg").then(function (xml) {
 
-        setTimeout(() => {
-            createPieCharts();
-            updateAll();
-        }, 500);
-    
+            const svgContainer = centerContainer.append("div")
+                .attr("id", "svg-container")
+                .style("width", "50%")
+                .style("display", "flex")
+                .style("height", "50vh") // Maintain aspect ratio
+                .style("justify-content", "center")
+                .style("z-index", "0")
+                .style("align-items", "center");
 
-        d3.xml("Images/only_organs_nobg.png").then(function (xml) {
+
             let importedNode = document.importNode(xml.documentElement, true);
-            centerContainer.node().appendChild(importedNode);
-            
-            const bodySvg = centerContainer.select("img");
-            
+            importedNode.id = "body-svg";
 
-            bodySvg.attr("width", "100%").attr("height", "100%")
-                .style("position", "relative")
-          
+            importedNode.setAttribute("preserveAspectRatio", "xMidYMid meet");
+            importedNode.setAttribute("width", "100%");
+            importedNode.setAttribute("height", "100vh");
+            importedNode.setAttribute("viewBox", "0 0 400 800"); // Adjust viewBox to match your SVG content
+            
+            svgContainer.node().appendChild(importedNode);
             setTimeout(() => {
-                
+                // Find and store organ elements
                 positions.forEach(pos => {
                     pos.element = document.getElementById(pos.organId);
                     if (!pos.element) {
@@ -167,8 +128,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 });
                 
+                // Initialize pie charts now that containers exist
                 createPieCharts();
                 updateAll();
+        
+
                 
               
                 positions.forEach(pos => {
@@ -185,50 +149,62 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Define the scroll-driven sections
-    scroller
-    .setup({
-        step: ".step",
-        offset: 0.6,
-        debug: false
-    })
-    .onStepEnter(response => {
-        currentState = +response.element.dataset.step;
-        updateAll();
-    });
-
-// Ensure Scrollama resizes after page load
-window.addEventListener("resize", () => {
-    scroller.resize();
-});
-
-
-    function handleStepEnter(response) {
-        currentState = +response.element.dataset.step;
-        updateAll();
+    function createChartContainer(parentContainer, pos) {
+        const container = parentContainer.append("div")
+            .attr("id", `chart-container-${pos.id}`)
+            .style("display", "flex")
+            .style("flex-direction", "row") // Side-by-side layout
+            .style("align-items", "center")
+            .style("justify-content", "center")
+            .style("margin", "15px 0")
+            .style("padding", "10px")
+            .style("background", "transparent")
+            .style("border-radius", "8px")
+            .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
+            .style("width", "100%")
+            .style("height", "300px")
+            .style("position", "relative")
+            .style("margin", "5px auto");
+            
+        
+        container.append("h4")
+            .text(pos.label)
+            .style("margin", "0 0 10px 0")
+            .style("font-size", "14px");
+        
+        // Append Organ Image    
+        container.append("img")
+            .attr("src", `Images/${pos.organId}.png`)
+            .attr("width", "60px")
+            .attr("height", "60px")
+            .style("margin-bottom", "2px");
+        
+        // Append Pie Chart Container
+        container.append("div")
+            .attr("id", `chart-${pos.id}`)
+            .style("width", "100px")
+            .style("height", "100px")
+            .style("display", "flex")
+            .style("justify-content", "center")
+            .style("align-items", "center")
+            .style("margin", "5px auto")
+            .style("position", "relative")
+            .style("margin", "5px auto")
+     
+        // Append Description Text
+        container.append("div")
+            .attr("class", "chart-text")
+            .attr("id", `text-${pos.id}`)
+            .style("font-size", "14px")
+            .style("margin-top", "10px")
+            .style("height", "40px")
+            .style("text-align", "center");
     }
 
-    function updateAll() {
-        let totalSurgeries = d3.sum(Object.values(surgeryData));
-        updateTitle();
-        positions.forEach(pos => {
-            updatePieChart(pos.id, totalSurgeries);
-        });
-    }
-
-    function updateTitle() {
-        const titles = [
-            "An analysis of the Distribution of Surgeries by Organs and Systems",
-            "The Distribution of Surgeries with Cancer vs Non-Cancer Diagnoses",
-            "A Comparison of Female vs Male Cancer Diagnoses by Organs and Organ Systems"
-        ];
-        d3.select("#status-title").text(titles[currentState]);
-    }
 
     function processData(data) {
-        totalSurgeries = data.length;  // Update global variable
         data.forEach(d => {
-          let optype = d.optype ? d.optype.replace(/\//g, "-") : "Unknown";
+          let optype = d.optype.replace(/\//g, "-");
           surgeryData[optype] = (surgeryData[optype] || 0) + 1;
           let isCancer = /(cancer|tumor|carcinoma|sarcoma|malignant|lymphoma)/i.test(d.dx);
           let gender = d.sex;
@@ -245,75 +221,44 @@ window.addEventListener("resize", () => {
             }
           }
         });
-        console.log("Processed Data: ", surgeryData, cancerData, genderData);
-
       }
+
     
     function createPieCharts() {
         let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
 
         positions.forEach(pos => {
-            let container = d3.select(`#chart-container-${pos.id}`);
+            let container = d3.select(`#chart-${pos.id}`);
+            
             if (container.empty()) {
-                console.warn(`Chart container missing for ${pos.id}`);
+                console.warn(`Missing container: chart-${pos.id}`);
                 return;
             }
+    
+            container.selectAll("svg").remove();
 
-            // Ensure pie chart container exists
-            let pieContainer = container.select(".pie-chart-container");
-                if (pieContainer.empty()) {
-                    pieContainer = container.append("div")
-                        .attr("class", "pie-chart-container")
-                        .attr("id", `chart-${pos.id}`);
-                } else {
-                    pieContainer.selectAll("svg").remove(); // Remove existing pie chart before adding new one
-                }
-
-
-            // Append the pie chart inside the correct `.pie-chart-container`
-            let svg = pieContainer.append("svg")
-                .attr("width", 200)
-                .attr("height", 200)
-                .append("g")
-                .attr("transform", "translate(100, 100)");
-
+            let svg = container.append("svg")
+                .attr("width", "200")
+                .attr("height", "200")
+                .style("overflow", "visible")
+                .style("position", "relative")
+                .style("margin", "0 auto");
+    
             svgElements[pos.id] = svg;
-            updatePieChart(pos.id, totalSurgeries);
-
-        
-            console.log(`Creating pie chart for ${pos.id}`);
-        
-            if (!svgElements[pos.id]) {
-                let pieContainer = container.select(".pie-chart-container");
-                    if (pieContainer.empty()) {
-                        console.warn(`Pie chart container missing for ${pos.id}, creating one.`);
-                        pieContainer = container.append("div")
-                            .attr("class", "pie-chart-container")
-                            .attr("id", `chart-${pos.id}`);
-                    } else {
-                        pieContainer.selectAll("svg").remove(); // Remove existing pie charts
-                    }
-
-let svg = pieContainer.append("svg")
-    .attr("width", 200)
-    .attr("height", 200)
-    .append("g")
-    .attr("transform", "translate(100, 100)");
-
-        
-                svgElements[pos.id] = svg;
-            }
+    
             updatePieChart(pos.id, totalSurgeries);
         });
-
-        console.log("Running createPieCharts");
     }
 
     function updatePieChart(optype, totalSurgeries) {
         let total = surgeryData[optype] || 0;
         let totalCancer = cancerData[optype] || 0;
         let maleCases = genderData[optype]?.M || 0;
+        let maleCancer = cancerData[optype]?.M || 0;
+        let maleNonCancer =  maleCases - maleCancer || 0;
+        let femaleCancer = cancerData[optype]?.F || 0;
         let femaleCases = genderData[optype]?.F || 0;
+        let femaleNonCancer = femaleCases-femaleCancer|| 0;
         let nonCancerCases = total - totalCancer;
         let textContent = "";
         let color = "black";
@@ -335,27 +280,61 @@ let svg = pieContainer.append("svg")
             ];
             color = "orange";
             textContent = `Out of all <b style="color:${color}">${optype}</b> surgeries, <b style="color:${color}">${percent}%</b> were cancer diagnoses.`;
-        } else {
+        } else if (currentState === 2)  {
             // Third toggle state: Split Cancer into Male/Female directly
-            let percentMale = totalCancer === 0 ? 0 : Math.round((maleCases / totalCancer) * 100);
-            let percentFemale = totalCancer === 0 ? 0 : Math.round((femaleCases / totalCancer) * 100);
+            let percentMale = totalCancer === 0 ? 0 : Math.round((maleCancer / totalCancer) * 100);
+            let percentFemale = totalCancer === 0 ? 0 : Math.round((femaleCancer / totalCancer) * 100);
             data = [
                 { label: "Non-Cancer", value: nonCancerCases || 1, color: "lightgrey" },
                 { label: "Male Cancer", value: maleCases || 1, color: "lightblue" },
                 { label: "Female Cancer", value: femaleCases || 1, color: "pink" }
             ];
             textContent = `Women made up <b style="color:pink">${percentFemale}%</b> and men <b style="color:lightblue">${percentMale}%</b> of the cancer diagnoses.`;
+        } else if (currentState === 3) {
+            data1 = [
+                { label: optype, value: total || 1, color: "red" },
+                { label: "Other Surgeries", value: totalSurgeries - total, color: "lightgrey" }
+            ];
+            color1 = "red";
+            let percentCancerMale = maleCases=== 0 ? 0 : Math.round((maleCancer / maleCases) * 100);
+            let percentNonCancerMale = maleCases === 0 ? 0 : Math.round((maleNonCancer / totalCancer) * 100);
+            let percentCancerFeale = femaleCases=== 0 ? 0 : Math.round((femaleCancer / femaleCases) * 100);
+            let percentNonCancerFeale = femaleCases === 0 ? 0 : Math.round((femaleNonCancer / femaleCancer) * 100);
+            data2 = [
+                { label: "Male Cases Non cancer ", value: percentNonCancerMale || 1, color: "lightgrey" },
+                { label: "Male Cases Cancer", value: percentCancerMale  || 1, color: "lightblue" },
+            ];
+            color2 = "lightblue";
+            data3 = [
+                { label: "Female Cases Non cancer ", value: percentNonCancerFeale || 1, color: "lightgrey" },
+                { label: "Female Cases Cancer", value: percentCancerFeale  || 1, color: "lightblue" },
+            ];
+            color3 = "pink";
         }
+
+            
         
         d3.select(`#text-${optype}`).html(textContent);
 
         let pie = d3.pie().value(d => d.value);
+        let radius = 35;
         let arc = d3.arc().innerRadius(0).outerRadius(radius);
 
         let svg = svgElements[optype];
         if (!svg) return;
 
-        let paths = svg.selectAll("path").data(pie(data.filter(d => d.value > 0)));
+        let g = svg.selectAll('.pie-container').data([null]);
+        
+        g = g.enter()
+            .append('g')
+            .attr('class', 'pie-container')
+            .attr('transform', 'translate(100,100)')
+            .merge(g);
+
+        // Update paths with transitions
+        let paths = g.selectAll("path").data(pie(data.filter(d => d.value > 0)));
+
+
 
         paths.transition()
             .duration(500)
@@ -382,7 +361,11 @@ let svg = pieContainer.append("svg")
                 };
             });
 
-        paths.exit().remove();
+        paths.exit()
+            .transition()
+            .duration(500)
+            .style("opacity", 0)
+            .remove();
 
         let text = svg.selectAll("text").data(pie(data));
 
@@ -393,14 +376,14 @@ let svg = pieContainer.append("svg")
             .attr("transform", d => {
                 let angle = (d.startAngle + d.endAngle) / 2 - Math.PI / 2; // Midpoint of slice
                 let isLargest = d.data.value === d3.max(data, d => d.value);
-                let offset = isLargest ? radius * 0.5 : radius * 1.1;
+                let offset = isLargest ? radius * 0.4 : radius * 0.8;
                 let x = Math.cos(angle) * offset;
                 let y = Math.sin(angle) * offset;
                 return `translate(${x}, ${y})`;
             })
             .attr("text-anchor", "middle")
             .attr("dy", "0.35em")
-            .style("font-size", "12px")
+            .style("font-size", "14px")
             .style("font-weight", "bold")
             .style("fill", "black")
             .text(d => `${Math.round(d.data.value / d3.sum(data, d => d.value) * 100)}%`);
@@ -408,82 +391,47 @@ let svg = pieContainer.append("svg")
         text.exit().remove();
     }
 
+    
     function showOrganConnection(pos) {
-        drawConnectingArrows() 
         arrowsSvg.selectAll("*").remove();
 
-        if (!pos.element) {
-            console.warn(`Missing organ element for ${pos.id}, skipping connection.`);
-            return; // Prevent further execution
-        }
+        if (!pos.element) return;
 
-        d3.select(pos.element)
-        .style("filter", "drop-shadow(0 0 5px red)")
-        .style("opacity", 1);
+        arrowsSvg.append("defs").append("marker")
+            .attr("id", "arrowhead")
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 8)
+            .attr("refY", 0)
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5")
+            .attr("fill", "#555");
 
-        // Ensure the element exists before calling getBoundingClientRect()
-        const organElement = document.getElementById(pos.organId);
-        if (!organElement) {
-            console.warn(`Organ element #${pos.organId} not found`);
-            return; // Exit function if the organ is missing
-        }
-
-        const organRect = organElement.getBoundingClientRect();
-        const svgRect = centerContainer.node().getBoundingClientRect();
-
-        const chartContainer = document.getElementById(`chart-container-${pos.id}`);
-        if (!chartContainer) {
-            console.warn(`Chart container #chart-container-${pos.id} not found`);
-            return; // Exit function if the chart container is missing
-        }
-
-        // Get the position of the chart container
-        const chartRect = chartContainer.getBoundingClientRect();
-
-        // Calculate positions relative to the SVG container
-        const organX = organRect.left + organRect.width / 2 - svgRect.left;
-        const organY = organRect.top + organRect.height / 2 - svgRect.top;
-    
-        const chartX = chartRect.left + chartRect.width / 2;
-        const chartY = chartRect.top + chartRect.height / 2;
-    
-        const midX = (organX + chartX) / 2;
-        const midY = (organY + chartY) / 2;
-
-        arrowsSvg.append("path")
-        .attr("d", `M${organX},${organY} Q${midX},${midY} ${chartX},${chartY}`)
-        .attr("fill", "none")
-        .attr("stroke", "#555")
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", "5,3")
-        .attr("marker-end", "url(#arrowhead)");
-
-        // Highlight the organ in the SVG
+ 
         if (pos.element) {
             d3.select(pos.element)
                 .style("filter", "drop-shadow(0 0 5px red)")
                 .style("opacity", 1);
         }
 
-        // Get the position of the organ in the SVG
-        if (!pos.element) {
-            console.warn(`Missing organ element for ${pos.id}, skipping connection.`);
-            return;
-        }
+
+        const centerRect = centerContainer.node().getBoundingClientRect();
+        const organRect = pos.element.getBoundingClientRect();
+        const chartContainer = document.getElementById(`chart-container-${pos.id}`);
+        const chartRect = chartContainer.getBoundingClientRect();
         
-        // Calculate target position on edge of SVG nearest to chart
-        const svgCenterX = svgRect.width/2;
-        const svgCenterY = svgRect.height/2;
+        // Calculate coordinates relative to the arrowsSvg
+        const organX = organRect.left + organRect.width/2 - centerRect.left;
+        const organY = organRect.top + organRect.height/2 - centerRect.top;
+        const chartX = chartRect.left + chartRect.width/2 - centerRect.left;
+        const chartY = chartRect.top + chartRect.height/2 - centerRect.top;
         
-        // Draw a line from organ to the edge of SVG in direction of chart
-        const angle = Math.atan2(chartRect.top - svgRect.top - svgCenterY, chartRect.left - svgRect.left - svgCenterX);
-        const edgeX = svgCenterX + Math.cos(angle) * (svgRect.width/2 - 10);
-        const edgeY = svgCenterY + Math.sin(angle) * (svgRect.height/2 - 10);
-        
-        // Add curve between organ and edge of SVG
+  
         arrowsSvg.append("path")
-            .attr("d", `M${organX},${organY} L${edgeX},${edgeY}`)
-            .attr("fill", "none")
+            .attr("d", `M${organX},${organY} L${chartX},${chartY}`)
+            .attr("fill", "black")
             .attr("stroke", "red")
             .attr("stroke-width", 2)
             .attr("stroke-dasharray", "5,3")
@@ -491,7 +439,7 @@ let svg = pieContainer.append("svg")
             .style("opacity", 0.8);
     }
 
-    // Function to hide all connections
+ 
     function hideOrganConnections() {
         arrowsSvg.selectAll("*").remove();
         
@@ -504,39 +452,37 @@ let svg = pieContainer.append("svg")
             }
             
         });
-        drawConnectingArrows() 
     }
 
     function updateAll() {
         let totalSurgeries = d3.sum(Object.values(surgeryData));
         updateTitle();
         updateLegend();
-        
+    
+        console.log("Current state:", currentState);
+    
         positions.forEach(pos => {
+            console.log(`Updating pie chart for ${pos.id}`);
             updatePieChart(pos.id, totalSurgeries);
         });
     }
+    
 
     function updateTitle() {
         const titles = [
             "An analysis of the Distribution of Surgeries by Organs and Systems",
             "The Distribution of Surgeries with Cancer vs Non-Cancer Diagnoses",
-            "A Comparison of Female vs Male Cancer Diagnoses by Organs and Organ Systems"
+            "A Comparison of Female vs Male Cancer Diagnoses by Organs and Organ Systems",
+            "Who? What? Where?"
         ];
-        d3.select("#status-title").text(titles[currentState]);
+        title.text(titles[currentState]);
     }
 
     function updateLegend() {
         d3.select("#legend").remove();
-        let legend = d3.select("#charts-container").append("div")
+        let legend = d3.select("body").append("div")
             .attr("id", "legend")
-            .style("position", "absolute")
-            .style("top", "100px")
-            .style("right", "20px")
-            .style("background", "transparent")
-            .style("padding", "10px")
-            .style("border", "1px solid #ccc")
-            .style("border-radius", "5px");
+            .style("position", "fixed")
 
         let legendData;
         if (currentState === 0) {
@@ -569,57 +515,15 @@ let svg = pieContainer.append("svg")
     }
 
     // Add window resize handler
-    window.addEventListener("resize", () => {
-        hideOrganConnections();
-    });
+    scroller.setup({
+        step: ".step",
+        offset: 0.5,
+        debug: false
+    })
+        .onStepEnter(response => {
+            currentState = response.index;
+            updateAll();
+        });
 
-    function drawConnectingArrows() {
-        arrowsSvg.selectAll("*").remove();
-    
-        arrowsSvg.append("defs").append("marker")
-            .attr("id", "arrowhead")
-            .attr("viewBox", "0 -5 10 10")
-            .attr("refX", 8)
-            .attr("refY", 0)
-            .attr("markerWidth", 6)
-            .attr("markerHeight", 6)
-            .attr("orient", "auto")
-            .append("path")
-            .attr("d", "M0,-5L10,0L0,5")
-            .attr("fill", "#555");
-    
-        setTimeout(() => {
-            const bodyRect = document.getElementById("body-image").getBoundingClientRect();
-    
-            positions.forEach(pos => {
-                const chartContainer = d3.select(`#chart-container-${pos.id}`).node();
-                if (!chartContainer) return;
-    
-                const chartRect = chartContainer.getBoundingClientRect();
-    
-                // Approximate organ positions manually
-                const organX = bodyRect.left + bodyRect.width / 2 + parseFloat(pos.x) * 0.6;
-                const organY = bodyRect.top + bodyRect.height / 2 + parseFloat(pos.y) * 0.6;
-    
-                // Calculate chart position
-                const chartX = chartRect.left + chartRect.width / 2;
-                const chartY = chartRect.top + chartRect.height / 2;
-    
-                const midX = (organX + chartX) / 2;
-                const midY = (organY + chartY) / 2;
-    
-                arrowsSvg.append("path")
-                    .attr("d", `M${organX},${organY} Q${midX},${midY} ${chartX},${chartY}`)
-                    .attr("fill", "none")
-                    .attr("stroke", "#555")
-                    .attr("stroke-width", 2)
-                    .attr("stroke-dasharray", "5,3")
-                    .attr("marker-end", "url(#arrowhead)");
-            });
-        }, 500);
-    }
-    
-
-    // Initial update
-    updateAll();
+    window.addEventListener("resize", scroller.resize);
 });

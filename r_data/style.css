@@ -189,8 +189,8 @@ button:hover {
 }
 
 .pie-chart-container {
-  width: 200px;
-  height: 200px;
+  width: 150px;
+  height: 150px;
   background: transparent;
   box-shadow: 0px 2px 4px rgba(110, 110, 110, 0.1);
   border-radius: 10px;
@@ -202,13 +202,22 @@ button:hover {
 /* Legend */
 
 #legend {
-  position: relative;
-  margin-top: 20px;
+  position: absolute;
+  bottom: 20px;
+  left: 60%;
+  transform: translateX(-50%);
   background: transparent;
+  backdrop-filter: blur(15px);
   padding: 10px;
-  border: 1px solid #ccc;
+  text-decoration-color: #adadad;
+  border: 1px solid #adadad;
   border-radius: 5px;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  z-index: 100;
 }
+
 
 
 /* Scrolling styles */
@@ -224,8 +233,8 @@ button:hover {
 #scrolly-overlay {
   position: relative;
   z-index: 10;
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 380px;
+  margin: -50 auto;
 }
 
 .step {
