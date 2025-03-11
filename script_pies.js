@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let cancerData = {};
     let genderData = {};
     let svgElements = {};
-    //let width = 150, height = 150, radius = Math.min(width, height) / 2;
+    let width = 150, height = 150, radius = Math.min(width, height) / 2;
   
     const steps = document.querySelectorAll(".step");
   
@@ -43,15 +43,15 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("z-index", "1");
 
     const centerContainer = visualizationWrapper.append("div")
-        .attr("id", "center-container")
-        .style("display", "flex")
-        .style("justify-content", "center")
-        .style("align-items", "center")
-        .style("width", "40%") 
-        .style("height", "80vh") // Adjust height to fill viewport properly
-        .style("position", "relative")
-        .style("top", "0px") // Ensure it aligns with the top
-        .style("z-index", "0");
+    .attr("id", "center-container")
+    .style("display", "flex")
+    .style("justify-content", "center")
+    .style("align-items", "center")
+    .style("width", "40%") 
+    .style("height", "80vh") // Adjust height to fill viewport properly
+    .style("position", "relative")
+    .style("top", "0px") // Ensure it aligns with the top
+    .style("z-index", "0");
 
     const rightChartsContainer = visualizationWrapper.append("div")
         .attr("id", "right-charts-container")
@@ -93,13 +93,10 @@ document.addEventListener("DOMContentLoaded", function () {
     leftPositions.forEach(pos => createChartContainer(leftChartsContainer, pos));
     rightPositions.forEach(pos => createChartContainer(rightChartsContainer, pos));
 
-
     d3.csv("sugeries.csv").then(function (data) {
         processData(data);
-        setTimeout(() => {
-            createBarCharts();
-            updateAll();
-        }, 500); // Delay ensures data is fully processed before rendering
+        createPieCharts();
+        updateAll();
 
         d3.xml("Images/only_organs_removebg.svg").then(function (xml) {
 
@@ -135,9 +132,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 });
                 
-                // Initialize charts now that containers exist
-                createBarCharts();
+                // Initialize pie charts now that containers exist
+                createPieCharts();
                 updateAll();
+        
+
+                
               
                 positions.forEach(pos => {
                     d3.select(`#chart-container-${pos.id}`)
@@ -157,101 +157,83 @@ document.addEventListener("DOMContentLoaded", function () {
         const container = parentContainer.append("div")
             .attr("id", `chart-container-${pos.id}`)
             .style("display", "flex")
-            .style("flex-direction", "column") // Stack elements vertically
+            .style("flex-direction", "row") // New row-based layout
             .style("align-items", "center")
-            .style("justify-content", "space-between")
+            .style("justify-content", "space-between") // Space elements correctly
             .style("margin", "10px 0")
             .style("padding", "10px")
             .style("background", "transparent")
             .style("border-radius", "8px")
             .style("box-shadow", "0 2px 4px rgba(110, 110, 110, 0.1)")
             .style("width", "100%")
+            .style("height", "130px") // Reduce height
             .style("position", "relative");
-    
-        // Top Section: Title and Organ Image
-        const topSection = container.append("div")
+
+        const leftSection = container.append("div")
             .style("display", "flex")
-            .style("flex-direction", "row") // Arrange title and image in a column
+            .style("flex-direction", "column") // Stack title and organ/image in a column
             .style("align-items", "center")
-            .style("width", "100%")
-            .style("justify-content", "space-between");
-    
-        // Title
-        const titleContainer = topSection.append("div")
-            .style("width", "35%") // Allocate space for title
-            .style("text-align", "center");
-    
-        titleContainer.append("h4")
+            .style("width", "40%"); // Left side takes 40%
+
+        leftSection.append("h4")
             .text(pos.label)
             .style("margin-bottom", "5px")
-            .style("font-size", "14px");
-    
-        // Organ Image
-        const imageContainer = topSection.append("div")
-            .style("width", "30%") // Allocate space for image
+            .style("font-size", "14px")
+            .style("text-align", "center");
+
+        // Append Organ Image & Pie Chart
+        const organChartWrapper = leftSection.append("div")
+            .style("display", "flex")
+            .style("align-items", "center")
+            .style("justify-content", "center")
+            .style("gap", "10px");
+
+        organChartWrapper.append("img")
+            .attr("src", `Images/${pos.organId}.png`)
+            .attr("width", "50px") // Adjust size
+            .attr("height", "50px");
+
+        organChartWrapper.append("div")
+            .attr("id", `chart-${pos.id}`)
+            .style("width", "90px")
+            .style("height", "90px")
             .style("display", "flex")
             .style("justify-content", "center")
             .style("align-items", "center");
-    
-        imageContainer.append("img")
-            .attr("src", `Images/${pos.organId}.png`)
-            .attr("width", "50px")
-            .attr("height", "50px");
-    
-        // Description
-        const descriptionContainer = topSection.append("div")
-            .attr("id", `text-${pos.id}`)
-            .style("width", "40%") // Allocate space for description
-            .style("font-size", "14px")
-            .style("text-align", "left")
-            .style("padding-left", "10px");
-    
-        // Bottom Section: Bar Container (spanning full width)
-        const barContainer = container.append("div")
-            .attr("id", `chart-${pos.id}`)
-            .style("width", "100%") // Full width
-            .style("height", "30px")
-            .style("background", "transparent")
-            .style("border-radius", "5px")
-            .style("margin-top", "10px");
-    }
-    
-    
 
-    d3.csv("sugeries.csv").then(data => {
-        const processedData = processData(data);
-        createBarCharts(processedData);
-    });
+        // Right section for the description
+        const rightSection = container.append("div")
+            .attr("class", "chart-text")
+            .attr("id", `text-${pos.id}`)
+            .style("width", "55%") // Right section takes 55%
+            .style("font-size", "14px")
+            .style("text-align", "left");
+
+    }
+
 
     function processData(data) {
         data.forEach(d => {
           let optype = d.optype.replace(/\//g, "-");
           surgeryData[optype] = (surgeryData[optype] || 0) + 1;
-          let isCancer = /(cancer|carcinoma|malignant|blastoma|tumor|neoplasm|sarcoma|glioma|lymphoma|leukemia|melanoma|mesothelioma|myeloma|teratoma)/i.test(d.dx);
+          let isCancer = /(cancer|tumor|carcinoma|sarcoma|malignant|lymphoma)/i.test(d.dx);
           let gender = d.sex;
     
           if (isCancer) {
             cancerData[optype] = (cancerData[optype] || 0) + 1;
-            
             if (!genderData[optype]) {
-                genderData[optype] = { total: 0, M: 0, F: 0 };
+              genderData[optype] = { M: 0, F: 0 };
             }
-        
-            genderData[optype].total += 1;
-            genderData[optype][gender] += 1;
+            if (gender === "M") {
+              genderData[optype].M++;
+            } else if (gender === "F") {
+              genderData[optype].F++;
+            }
           }
-          return data.map(d => ({
-            system: d.system,
-            total: +d.total_surgeries,
-            cancer: +d.cancer_surgeries,
-            male: +d.male_cancer_surgeries,
-            female: +d.female_cancer_surgeries
-        }));      
-        
         });
       }
 
-    /*
+    
     function createPieCharts() {
         let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
 
@@ -276,121 +258,15 @@ document.addEventListener("DOMContentLoaded", function () {
     
             updatePieChart(pos.id, totalSurgeries);
         });
-    } */
-
-    function createBarCharts() {
-        let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
-
-        positions.forEach(pos => {
-            let container = d3.select(`#chart-${pos.id}`);
-
-            if (container.empty()) {
-                console.warn(`Missing container: chart-${pos.id}`);
-                return;
-            }
-
-            // Clear existing SVG
-            container.selectAll("svg").remove(); // Remove any existing SVG before creating new ones
-
-
-            // Create SVG for bar chart
-            let svg = container.append("svg")
-                .attr("width", "100%") // Full width to match the container
-                .attr("height", "30px");
-
-            svgElements[pos.id] = svg;
-
-            updateBarChart(pos.id, totalSurgeries);
-        });
     }
 
-
-    function updateBarChart(optype, totalSurgeries) {
-        let total = surgeryData[optype] ?? 0; 
-        let totalCancer = cancerData[optype] ?? 0;
-        let maleCancer = genderData[optype]?.M ?? 0;
-        let femaleCancer = genderData[optype]?.F ?? 0;
-        let referenceTotal; // This is the new "100%" value
-
-        // Avoid division by zero
-        if (total === 0) total = 1;
-        if (totalCancer === 0) totalCancer = 1;
-
-        let nonCancerCases = total - totalCancer;
-        let textContent = "";
-        
-        let data;
-        
-        if (currentState === 0) {
-            referenceTotal = totalSurgeries; // 100% is all surgeries
-            data = [
-                { label: "System-specific Surgery", value: total, color: "red" },
-                { label: "Other Surgeries", value: totalSurgeries - total, color: "lightgrey" }
-            ];
-            textContent = `Out of all surgeries, <b style="color:red">${optype}</b> constituted <b style="color:red">${Math.round((total / totalSurgeries) * 100)}%</b>.`;
-        } else if (currentState === 1) {
-            referenceTotal = total; // Now, system-specific surgeries become 100%
-            data = [
-                { label: "Cancer", value: totalCancer, color: "orange" },
-                { label: "Non-Cancer", value: total - totalCancer, color: "lightgrey" }
-            ];
-            textContent = `Out of all <b style="color:orange">${optype}</b> surgeries, <b style="color:orange">${Math.round((totalCancer / total) * 100)}%</b> were cancer diagnoses.`;
-        } else if (currentState === 2) {
-            referenceTotal = totalCancer; // Now, cancer surgeries become 100%
-            data = [
-                { label: "Male Cancer", value: maleCancer, color: "lightblue" },
-                { label: "Female Cancer", value: femaleCancer, color: "pink" }
-            ];
-            textContent = `Women made up <b style="color:pink">${Math.round((femaleCancer / totalCancer) * 100)}%</b> and men <b style="color:lightblue">${Math.round((maleCancer / totalCancer) * 100)}%</b> of the cancer diagnoses.`;
-        }
-
-        // Prevent division by zero
-        referenceTotal = referenceTotal || 1;
-        
-        
-        let svg = svgElements[optype];
-        if (!svg) return;
-    
-        let container = d3.select(`#chart-${optype}`);
-        if (container.empty()) {
-            console.warn(`Container for ${optype} not found`);
-            return;
-        }
-
-        let totalWidth = container.node().getBoundingClientRect().width || 300; // Fallback to 300px if width is not detected
-
-        
-        let bars = svg.selectAll("rect")
-            .data(data, d => d.label); // Use data join to prevent duplicates
-
-        bars.enter()
-            .append("rect")
-            .merge(bars)
-            .transition()
-            .duration(500)
-            .attr("x", (d, i) => i === 0 ? 0 : d3.sum(data.slice(0, i), d => d.value) / referenceTotal * totalWidth)
-            .attr("width", d => (d.value / referenceTotal) * totalWidth)
-            .attr("height", "25")
-            .attr("ry", 8)  // Rounds the corners verticaally
-            .attr("fill", d => d.color);
-
-        bars.exit().remove(); // Ensure old bars are properly removed
-        
-        d3.select(`#text-${optype}`).html(textContent);
-    }
-    
-    
-    
-    
-
-    /*
     function updatePieChart(optype, totalSurgeries) {
         let total = surgeryData[optype] || 0;
         let totalCancer = cancerData[optype] || 0;
         let maleCases = genderData[optype]?.M || 0;
-        let maleCancer = genderData[optype]?.M || 0;
+        let maleCancer = cancerData[optype]?.M || 0;
         let maleNonCancer =  maleCases - maleCancer || 0;
-        let femaleCancer = genderData[optype]?.F || 0;
+        let femaleCancer = cancerData[optype]?.F || 0;
         let femaleCases = genderData[optype]?.F || 0;
         let femaleNonCancer = femaleCases-femaleCancer|| 0;
         let nonCancerCases = total - totalCancer;
@@ -416,27 +292,14 @@ document.addEventListener("DOMContentLoaded", function () {
             textContent = `Out of all <b style="color:${color}">${optype}</b> surgeries, <b style="color:${color}">${percent}%</b> were cancer diagnoses.`;
         } else if (currentState === 2)  {
             // Third toggle state: Split Cancer into Male/Female directly
-            let totalGenderCases = genderData[optype]?.total || 1;
-            let percentMale = Math.round((maleCancer / totalGenderCases) * 100);
-            let percentFemale = Math.round((femaleCancer / totalGenderCases) * 100);
+            let percentMale = totalCancer === 0 ? 0 : Math.round((maleCancer / totalCancer) * 100);
+            let percentFemale = totalCancer === 0 ? 0 : Math.round((femaleCancer / totalCancer) * 100);
             data = [
                 { label: "Non-Cancer", value: nonCancerCases || 1, color: "lightgrey" },
                 { label: "Male Cancer", value: maleCases || 1, color: "lightblue" },
                 { label: "Female Cancer", value: femaleCases || 1, color: "pink" }
             ];
-            textContent = "";
-            if (percentFemale > 0) {
-                textContent += `Women made up <b style="color:pink">${percentFemale}%</b>`;
-            }
-            if (percentMale > 0) {
-                textContent += (textContent ? " and " : "") + `men <b style="color:lightblue">${percentMale}%</b>`;
-            }
-            if (textContent) {
-                textContent += " of the cancer diagnoses.";
-            } else {
-                textContent = "No gender data available for this surgery type.";
-            }
-
+            textContent = `Women made up <b style="color:pink">${percentFemale}%</b> and men <b style="color:lightblue">${percentMale}%</b> of the cancer diagnoses.`;
         } else if (currentState === 3) {
             data1 = [
                 { label: optype, value: total || 1, color: "red" },
@@ -464,7 +327,7 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select(`#text-${optype}`).html(textContent);
 
         let pie = d3.pie().value(d => d.value);
-        let radius = 38;
+        let radius = 35;
         let arc = d3.arc().innerRadius(0).outerRadius(radius);
 
         let svg = svgElements[optype];
@@ -541,7 +404,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         text.exit().remove();
 
-    }*/
+    }
 
     
     function showOrganConnection(pos) {
@@ -615,7 +478,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
         positions.forEach(pos => {
             //console.log(`Updating pie chart for ${pos.id}`);
-            updateBarChart(pos.id, totalSurgeries);
+            updatePieChart(pos.id, totalSurgeries);
         });
     }
     
@@ -647,7 +510,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 { label: "Cancer", color: "orange" },
                 { label: "Non-Cancer", color: "lightgrey" }
             ];
-        } else if (currentState === 2){
+        } else {
             legendData = [
                 { label: "Non-Cancer", color: "lightgrey" },
                 { label: "Male Cancer", color: "lightblue" },
@@ -676,7 +539,6 @@ document.addEventListener("DOMContentLoaded", function () {
             currentState = response.index;
             updateAll();
         });
-    
+
     window.addEventListener("resize", scroller.resize);
-    
 });

@@ -129,12 +129,14 @@ button:hover {
 }
 
 .chart-text-container {
-  width: 250px;
-  padding-left: 10px;
-  font-size: 16px;
-  top:-30px;
+  width: 55%; /* Matches the right section width */
+  font-size: 14px;
+  padding-left: 15px;
   text-align: left;
+  display: flex;
+  align-items: center;
 }
+
 
 /* Ensure text is positioned to the right or left */
 
@@ -159,7 +161,7 @@ button:hover {
 #main-container {
   flex: 2;
   position: fixed;
-  right: 0;
+  right: 120px;
   top: 100px;  /* Push down to prevent overlap */
   width: 55%;
   height: calc(100vh - 80px); /* Adjust height */
@@ -189,8 +191,8 @@ button:hover {
 }
 
 .pie-chart-container {
-  width: 200px;
-  height: 200px;
+  width: 150px;
+  height: 150px;
   background: transparent;
   box-shadow: 0px 2px 4px rgba(110, 110, 110, 0.1);
   border-radius: 10px;
@@ -198,17 +200,100 @@ button:hover {
   text-align: center;
 }
 
+.pie-text {
+  font-size: 10px;
+  font-weight: bold;
+  fill: black !important;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+
+.bar-chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: auto;
+  padding: 10px;
+  margin: 10px 0;
+  background: transparent;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(110, 110, 110, 0.1);
+}
+
+.bar-chart-container div {
+  width: 100%;
+}
+
+.chart-top {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.bar-container {
+  width: 100%;
+  height: 30px;
+  margin-top: auto;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+
+.left-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 20%;
+}
+
+
+.organ-icon {
+  width: 50px;
+  height: 50px;
+  margin-top: 5px;
+}
+
+.description-container {
+  width: 30%;
+  text-align: left;
+  padding-left: 10px;
+}
+
+
+svg {
+  margin-top: 10px;
+}
+
+
+
 
 /* Legend */
 
 #legend {
-  position: relative;
-  margin-top: 20px;
+  position: absolute;
+  bottom: 20px;
+  left: 62%;
+  transform: translateX(-50%);
   background: transparent;
+  backdrop-filter: blur(15px);
   padding: 10px;
-  border: 1px solid #ccc;
+  text-decoration-color: #adadad;
+  border: 1px solid #adadad;
   border-radius: 5px;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  z-index: 100;
 }
+
 
 
 /* Scrolling styles */
@@ -224,8 +309,8 @@ button:hover {
 #scrolly-overlay {
   position: relative;
   z-index: 10;
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 400px;
+  margin: -50 auto;
 }
 
 .step {

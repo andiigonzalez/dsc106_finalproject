@@ -230,7 +230,7 @@ window.addEventListener("resize", () => {
         data.forEach(d => {
           let optype = d.optype ? d.optype.replace(/\//g, "-") : "Unknown";
           surgeryData[optype] = (surgeryData[optype] || 0) + 1;
-          let isCancer = /(cancer|tumor|carcinoma|sarcoma|malignant|lymphoma)/i.test(d.dx);
+          let isCancer = /(cancer|tumor|carcinoma|sarcoma|malignant|lymphoma|blastoma|tumor|neoplasm|glioma|leukemia|melanoma|mesothelioma|myeloma|teratoma)/i.test(d.dx);
           let gender = d.sex;
     
           if (isCancer) {
