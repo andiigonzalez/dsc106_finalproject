@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("flex-direction", "column")
         .style("align-items", "center")
         .style("width", "100%")
-        .style("max-width", "1400px")
+        .style("max-width", "1200px")
         .style("margin", "0 auto");
 
     const scroller = scrollama();
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .style("justify-content", "center")
     .style("align-items", "center")
     .style("width", "40%") 
-    .style("height", "100vh") // Adjust height to fill viewport properly
+    .style("height", "80vh") // Adjust height to fill viewport properly
     .style("position", "relative")
     .style("top", "0px") // Ensure it aligns with the top
     .style("z-index", "0");
@@ -104,10 +104,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 .attr("id", "svg-container")
                 .style("width", "50%")
                 .style("display", "flex")
-                .style("height", "50vh") // Maintain aspect ratio
+                .style("height", "50vh")
                 .style("justify-content", "center")
-                .style("z-index", "0")
-                .style("align-items", "center");
+                .style("align-items", "center")
+                .style("position", "relative")
+                .style("top", "-100px") // Move up by 100px
+                .style("left", "70px") // Move right by 70px
+                .style("z-index", "0");
+
 
 
             let importedNode = document.importNode(xml.documentElement, true);
@@ -153,52 +157,58 @@ document.addEventListener("DOMContentLoaded", function () {
         const container = parentContainer.append("div")
             .attr("id", `chart-container-${pos.id}`)
             .style("display", "flex")
-            .style("flex-direction", "row") // Side-by-side layout
+            .style("flex-direction", "row") // New row-based layout
             .style("align-items", "center")
-            .style("justify-content", "center")
-            .style("margin", "15px 0")
+            .style("justify-content", "space-between") // Space elements correctly
+            .style("margin", "10px 0")
             .style("padding", "10px")
             .style("background", "transparent")
             .style("border-radius", "8px")
-            .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
+            .style("box-shadow", "0 2px 4px rgba(110, 110, 110, 0.1)")
             .style("width", "100%")
-            .style("height", "300px")
-            .style("position", "relative")
-            .style("margin", "5px auto");
-            
-        
-        container.append("h4")
+            .style("height", "130px") // Reduce height
+            .style("position", "relative");
+
+        const leftSection = container.append("div")
+            .style("display", "flex")
+            .style("flex-direction", "column") // Stack title and organ/image in a column
+            .style("align-items", "center")
+            .style("width", "40%"); // Left side takes 40%
+
+        leftSection.append("h4")
             .text(pos.label)
-            .style("margin", "0 0 10px 0")
-            .style("font-size", "14px");
-        
-        // Append Organ Image    
-        container.append("img")
+            .style("margin-bottom", "5px")
+            .style("font-size", "14px")
+            .style("text-align", "center");
+
+        // Append Organ Image & Pie Chart
+        const organChartWrapper = leftSection.append("div")
+            .style("display", "flex")
+            .style("align-items", "center")
+            .style("justify-content", "center")
+            .style("gap", "10px");
+
+        organChartWrapper.append("img")
             .attr("src", `Images/${pos.organId}.png`)
-            .attr("width", "60px")
-            .attr("height", "60px")
-            .style("margin-bottom", "2px");
-        
-        // Append Pie Chart Container
-        container.append("div")
+            .attr("width", "50px") // Adjust size
+            .attr("height", "50px");
+
+        organChartWrapper.append("div")
             .attr("id", `chart-${pos.id}`)
-            .style("width", "100px")
-            .style("height", "100px")
+            .style("width", "90px")
+            .style("height", "90px")
             .style("display", "flex")
             .style("justify-content", "center")
-            .style("align-items", "center")
-            .style("margin", "5px auto")
-            .style("position", "relative")
-            .style("margin", "5px auto")
-     
-        // Append Description Text
-        container.append("div")
+            .style("align-items", "center");
+
+        // Right section for the description
+        const rightSection = container.append("div")
             .attr("class", "chart-text")
             .attr("id", `text-${pos.id}`)
+            .style("width", "55%") // Right section takes 55%
             .style("font-size", "14px")
-            .style("margin-top", "10px")
-            .style("height", "40px")
-            .style("text-align", "center");
+            .style("text-align", "left");
+
     }
 
 
@@ -367,28 +377,33 @@ document.addEventListener("DOMContentLoaded", function () {
             .style("opacity", 0)
             .remove();
 
-        let text = svg.selectAll("text").data(pie(data));
+        let text = g.selectAll(".pie-text").data(pie(data));
 
-        text.enter().append("text")
+        text.enter()
+            .append("text")
+            .attr("class", "pie-text")
             .merge(text)
             .transition()
             .duration(500)
             .attr("transform", d => {
-                let angle = (d.startAngle + d.endAngle) / 2 - Math.PI / 2; // Midpoint of slice
-                let isLargest = d.data.value === d3.max(data, d => d.value);
-                let offset = isLargest ? radius * 0.4 : radius * 0.8;
-                let x = Math.cos(angle) * offset;
-                let y = Math.sin(angle) * offset;
-                return `translate(${x}, ${y})`;
+                let centroid = arc.centroid(d); // Get label position inside slice
+                let x = centroid[0] * 0.85;  // Adjust slightly inward
+                let y = centroid[1] * 0.85;
+
+                return `translate(${x}, ${y})`; // No rotation, keeps text always upright
             })
-            .attr("text-anchor", "middle")
-            .attr("dy", "0.35em")
-            .style("font-size", "14px")
-            .style("font-weight", "bold")
+            .attr("text-anchor", "middle") // Ensures proper horizontal alignment
+            .attr("dy", "0.35em") // Keeps vertical alignment centered
+            .style("font-size", "10px") // Keeps text small for readability
             .style("fill", "black")
-            .text(d => `${Math.round(d.data.value / d3.sum(data, d => d.value) * 100)}%`);
+            .style("font-weight", "bold")
+            .text(d => {
+                let percentage = Math.round(d.data.value / d3.sum(data, d => d.value) * 100);
+                return percentage > 5 ? `${percentage}%` : ""; // Hide very small percentages
+            });
 
         text.exit().remove();
+
     }
 
     
@@ -462,7 +477,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("Current state:", currentState);
     
         positions.forEach(pos => {
-            console.log(`Updating pie chart for ${pos.id}`);
+            //console.log(`Updating pie chart for ${pos.id}`);
             updatePieChart(pos.id, totalSurgeries);
         });
     }
@@ -470,9 +485,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateTitle() {
         const titles = [
-            "An analysis of the Distribution of Surgeries by Organs and Systems",
-            "The Distribution of Surgeries with Cancer vs Non-Cancer Diagnoses",
-            "A Comparison of Female vs Male Cancer Diagnoses by Organs and Organ Systems",
+            "Analysis of the Distribution of Surgeries by Organs and Systems",
+            "Distribution of Surgeries Related to Cancer Diagnoses",
+            "Comparison of Surgeries Performed on Female and Male Cancer Patients by Organ Systems",
             "Who? What? Where?"
         ];
         title.text(titles[currentState]);

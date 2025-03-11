@@ -8,7 +8,6 @@ const ARE_WE_HOME = document.documentElement.classList.contains("home");
 
 const pages = [
   { url: "", title: "Home" },
-  // { url: "writeup.html", title: "Writeup" },
   { url: "https://github.com/andiigonzalez/dsc106_finalproject", title: "GitHub Repository", external: true },
 ];
 const BASE_URL = "https://andiigonzalez.github.io/dsc106_finalproject/";

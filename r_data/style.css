@@ -129,12 +129,14 @@ button:hover {
 }
 
 .chart-text-container {
-  width: 250px;
-  padding-left: 10px;
-  font-size: 16px;
-  top:-30px;
+  width: 55%; /* Matches the right section width */
+  font-size: 14px;
+  padding-left: 15px;
   text-align: left;
+  display: flex;
+  align-items: center;
 }
+
 
 /* Ensure text is positioned to the right or left */
 
@@ -159,7 +161,7 @@ button:hover {
 #main-container {
   flex: 2;
   position: fixed;
-  right: 0;
+  right: 120px;
   top: 100px;  /* Push down to prevent overlap */
   width: 55%;
   height: calc(100vh - 80px); /* Adjust height */
@@ -198,13 +200,24 @@ button:hover {
   text-align: center;
 }
 
+.pie-text {
+  font-size: 10px;
+  font-weight: bold;
+  fill: black !important;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+
+
+
 
 /* Legend */
 
 #legend {
   position: absolute;
   bottom: 20px;
-  left: 60%;
+  left: 62%;
   transform: translateX(-50%);
   background: transparent;
   backdrop-filter: blur(15px);
@@ -233,7 +246,7 @@ button:hover {
 #scrolly-overlay {
   position: relative;
   z-index: 10;
-  max-width: 380px;
+  max-width: 400px;
   margin: -50 auto;
 }
 
