@@ -162,8 +162,8 @@ document.addEventListener("DOMContentLoaded", function () {
             .style("flex-direction", "column") // Stack elements vertically
             .style("align-items", "center")
             .style("justify-content", "space-between")
-            .style("margin", "10px 0")
-            .style("padding", "10px")
+            .style("margin", "5px")
+            .style("padding", "5px")
             .style("background", "transparent")
             .style("border-radius", "8px")
             .style("box-shadow", "0 2px 4px rgba(110, 110, 110, 0.1)")
@@ -197,8 +197,8 @@ document.addEventListener("DOMContentLoaded", function () {
     
         imageContainer.append("img")
             .attr("src", `Images/${pos.organId}.png`)
-            .attr("width", "50px")
-            .attr("height", "50px");
+            .attr("width", "45px")
+            .attr("height", "45px");
     
         // Description
         const descriptionContainer = topSection.append("div")
@@ -212,10 +212,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const barContainer = container.append("div")
             .attr("id", `chart-${pos.id}`)
             .style("width", "100%") // Full width
-            .style("height", "30px")
+            .style("height", "40px")
             .style("background", "transparent")
             .style("border-radius", "5px")
-            .style("margin-top", "10px");
+            .style("margin-top", "5px");
     }
     
     
