@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const leftPositions = [
         { id: "Lymphatic-Endocrine", label: "Lymphatic/Endocrine System", organId: "Thyroid", organName: "Thyroid" },
         { id: "Digestive", label: "Digestive System", organId: "Stomach", organName: "Stomach" },
-        { id: "Pancreatic-Billiary", label: "Pancreatic/Billiary System", organId: "Pancreas", organName: "Pancreas" },
+        { id: "Pancreatic-Biliary", label: "Pancreatic/Biliary System", organId: "Pancreas", organName: "Pancreas" },
         { id: "Urinary", label: "Urinary System", organId: "Kidneys", organName: "Kidneys" }
     ];
     
