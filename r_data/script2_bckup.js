@@ -1,3 +1,5 @@
+import { animateScalpels } from './animation.js';
+
 document.addEventListener("DOMContentLoaded", function () {
     let currentState = 0;
     let surgeryData = {};
@@ -201,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Description
         const descriptionContainer = topSection.append("div")
             .attr("id", `text-${pos.id}`)
-            .style("width", "40%") // Allocate space for description
+            .style("width", "50%") // Allocate space for description
             .style("font-size", "14px")
             .style("text-align", "left")
             .style("padding-left", "10px");
@@ -251,33 +253,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
       }
 
-    /*
-    function createPieCharts() {
-        let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
-
-        positions.forEach(pos => {
-            let container = d3.select(`#chart-${pos.id}`);
-            
-            if (container.empty()) {
-                console.warn(`Missing container: chart-${pos.id}`);
-                return;
-            }
-    
-            container.selectAll("svg").remove();
-
-            let svg = container.append("svg")
-                .attr("width", "200")
-                .attr("height", "200")
-                .style("overflow", "visible")
-                .style("position", "relative")
-                .style("margin", "0 auto");
-    
-            svgElements[pos.id] = svg;
-    
-            updatePieChart(pos.id, totalSurgeries);
-        });
-    } */
-
     function createBarCharts() {
         let totalSurgeries = Object.values(surgeryData).reduce((a, b) => a + b, 0);
 
@@ -320,28 +295,32 @@ document.addEventListener("DOMContentLoaded", function () {
         let textContent = "";
         
         let data;
-        
+
         if (currentState === 0) {
+            return; // Do nothing on Step 0
+        }
+         else if (currentState === 1) {
+
             referenceTotal = totalSurgeries; // 100% is all surgeries
             data = [
                 { label: "System-specific Surgery", value: total, color: "red" },
                 { label: "Other Surgeries", value: totalSurgeries - total, color: "lightgrey" }
             ];
-            textContent = `Out of all surgeries, <b style="color:red">${optype}</b> constituted <b style="color:red">${Math.round((total / totalSurgeries) * 100)}%</b>.`;
-        } else if (currentState === 1) {
+            textContent = `Out of all surgeries, <b style="color:red">${optype}</b> constituted <b style="color:red">${Math.round((total / totalSurgeries) * 100)}%</b> of the total surgeries.`;
+        } else if (currentState === 2) {
             referenceTotal = total; // Now, system-specific surgeries become 100%
             data = [
                 { label: "Cancer", value: totalCancer, color: "orange" },
                 { label: "Non-Cancer", value: total - totalCancer, color: "lightgrey" }
             ];
             textContent = `Out of all <b style="color:orange">${optype}</b> surgeries, <b style="color:orange">${Math.round((totalCancer / total) * 100)}%</b> were cancer diagnoses.`;
-        } else if (currentState === 2) {
+        } else if (currentState === 3) {
             referenceTotal = totalCancer; // Now, cancer surgeries become 100%
             data = [
                 { label: "Male Cancer", value: maleCancer, color: "lightblue" },
                 { label: "Female Cancer", value: femaleCancer, color: "pink" }
             ];
-            textContent = `Women made up <b style="color:pink">${Math.round((femaleCancer / totalCancer) * 100)}%</b> and men <b style="color:lightblue">${Math.round((maleCancer / totalCancer) * 100)}%</b> of the cancer diagnoses.`;
+            textContent = `Women made up <b style="color:pink">${Math.round((femaleCancer / totalCancer) * 100)}%</b> and men <b style="color:lightblue">${Math.round((maleCancer / totalCancer) * 100)}%</b> of cancer-related surgeries.`;
         }
 
         // Prevent division by zero
@@ -371,179 +350,14 @@ document.addEventListener("DOMContentLoaded", function () {
             .attr("x", (d, i) => i === 0 ? 0 : d3.sum(data.slice(0, i), d => d.value) / referenceTotal * totalWidth)
             .attr("width", d => (d.value / referenceTotal) * totalWidth)
             .attr("height", "25")
-            .attr("ry", 8)  // Rounds the corners verticaally
+            .attr("ry", 2)  // Rounds the corners vertically
             .attr("fill", d => d.color);
 
         bars.exit().remove(); // Ensure old bars are properly removed
         
         d3.select(`#text-${optype}`).html(textContent);
     }
-    
-    
-    
-    
 
-    /*
-    function updatePieChart(optype, totalSurgeries) {
-        let total = surgeryData[optype] || 0;
-        let totalCancer = cancerData[optype] || 0;
-        let maleCases = genderData[optype]?.M || 0;
-        let maleCancer = genderData[optype]?.M || 0;
-        let maleNonCancer =  maleCases - maleCancer || 0;
-        let femaleCancer = genderData[optype]?.F || 0;
-        let femaleCases = genderData[optype]?.F || 0;
-        let femaleNonCancer = femaleCases-femaleCancer|| 0;
-        let nonCancerCases = total - totalCancer;
-        let textContent = "";
-        let color = "black";
-
-        let data;
-        if (currentState === 0) {
-            let percent = Math.round((total / totalSurgeries) * 100);
-            data = [
-                { label: optype, value: total || 1, color: "red" },
-                { label: "Other Surgeries", value: totalSurgeries - total, color: "lightgrey" }
-            ];
-            color = "red";
-            textContent = `Out of all surgeries, <b style="color:${color}"> ${optype}</b> constituted <b style="color:${color}">${percent}%</b>.`;
-        } else if (currentState === 1) {
-            let percent = total === 0 ? 0 : Math.round((totalCancer / total) * 100);
-            data = [
-                { label: "Cancer", value: totalCancer || 1, color: "orange" },
-                { label: "Other", value: total - totalCancer || 1, color: "lightgrey" }
-            ];
-            color = "orange";
-            textContent = `Out of all <b style="color:${color}">${optype}</b> surgeries, <b style="color:${color}">${percent}%</b> were cancer diagnoses.`;
-        } else if (currentState === 2)  {
-            // Third toggle state: Split Cancer into Male/Female directly
-            let totalGenderCases = genderData[optype]?.total || 1;
-            let percentMale = Math.round((maleCancer / totalGenderCases) * 100);
-            let percentFemale = Math.round((femaleCancer / totalGenderCases) * 100);
-            data = [
-                { label: "Non-Cancer", value: nonCancerCases || 1, color: "lightgrey" },
-                { label: "Male Cancer", value: maleCases || 1, color: "lightblue" },
-                { label: "Female Cancer", value: femaleCases || 1, color: "pink" }
-            ];
-            textContent = "";
-            if (percentFemale > 0) {
-                textContent += `Women made up <b style="color:pink">${percentFemale}%</b>`;
-            }
-            if (percentMale > 0) {
-                textContent += (textContent ? " and " : "") + `men <b style="color:lightblue">${percentMale}%</b>`;
-            }
-            if (textContent) {
-                textContent += " of the cancer diagnoses.";
-            } else {
-                textContent = "No gender data available for this surgery type.";
-            }
-
-        } else if (currentState === 3) {
-            data1 = [
-                { label: optype, value: total || 1, color: "red" },
-                { label: "Other Surgeries", value: totalSurgeries - total, color: "lightgrey" }
-            ];
-            color1 = "red";
-            let percentCancerMale = maleCases=== 0 ? 0 : Math.round((maleCancer / maleCases) * 100);
-            let percentNonCancerMale = maleCases === 0 ? 0 : Math.round((maleNonCancer / totalCancer) * 100);
-            let percentCancerFeale = femaleCases=== 0 ? 0 : Math.round((femaleCancer / femaleCases) * 100);
-            let percentNonCancerFeale = femaleCases === 0 ? 0 : Math.round((femaleNonCancer / femaleCancer) * 100);
-            data2 = [
-                { label: "Male Cases Non cancer ", value: percentNonCancerMale || 1, color: "lightgrey" },
-                { label: "Male Cases Cancer", value: percentCancerMale  || 1, color: "lightblue" },
-            ];
-            color2 = "lightblue";
-            data3 = [
-                { label: "Female Cases Non cancer ", value: percentNonCancerFeale || 1, color: "lightgrey" },
-                { label: "Female Cases Cancer", value: percentCancerFeale  || 1, color: "lightblue" },
-            ];
-            color3 = "pink";
-        }
-
-            
-        
-        d3.select(`#text-${optype}`).html(textContent);
-
-        let pie = d3.pie().value(d => d.value);
-        let radius = 38;
-        let arc = d3.arc().innerRadius(0).outerRadius(radius);
-
-        let svg = svgElements[optype];
-        if (!svg) return;
-
-        let g = svg.selectAll('.pie-container').data([null]);
-        
-        g = g.enter()
-            .append('g')
-            .attr('class', 'pie-container')
-            .attr('transform', 'translate(100,100)')
-            .merge(g);
-
-        // Update paths with transitions
-        let paths = g.selectAll("path").data(pie(data.filter(d => d.value > 0)));
-
-
-
-        paths.transition()
-            .duration(500)
-            .attrTween("d", function (d) {
-                let interpolator = d3.interpolate(this._current || d, d);
-                this._current = interpolator(1);
-                return function (t) {
-                    return arc(interpolator(t));
-                };
-            })
-            .attr("fill", d => d.data.color);
-
-        paths.enter()
-            .append("path")
-            .attr("d", arc)
-            .attr("fill", d => d.data.color)
-            .each(function (d) { this._current = d; }) // Store current state for transitions
-            .transition()
-            .duration(500)
-            .attrTween("d", function (d) {
-                let interpolator = d3.interpolate({ startAngle: 0, endAngle: 0 }, d);
-                return function (t) {
-                    return arc(interpolator(t));
-                };
-            });
-
-        paths.exit()
-            .transition()
-            .duration(500)
-            .style("opacity", 0)
-            .remove();
-
-        let text = g.selectAll(".pie-text").data(pie(data));
-
-        text.enter()
-            .append("text")
-            .attr("class", "pie-text")
-            .merge(text)
-            .transition()
-            .duration(500)
-            .attr("transform", d => {
-                let centroid = arc.centroid(d); // Get label position inside slice
-                let x = centroid[0] * 0.85;  // Adjust slightly inward
-                let y = centroid[1] * 0.85;
-
-                return `translate(${x}, ${y})`; // No rotation, keeps text always upright
-            })
-            .attr("text-anchor", "middle") // Ensures proper horizontal alignment
-            .attr("dy", "0.35em") // Keeps vertical alignment centered
-            .style("font-size", "10px") // Keeps text small for readability
-            .style("fill", "black")
-            .style("font-weight", "bold")
-            .text(d => {
-                let percentage = Math.round(d.data.value / d3.sum(data, d => d.value) * 100);
-                return percentage > 5 ? `${percentage}%` : ""; // Hide very small percentages
-            });
-
-        text.exit().remove();
-
-    }*/
-
-    
     function showOrganConnection(pos) {
         arrowsSvg.selectAll("*").remove();
 
@@ -622,61 +436,181 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateTitle() {
         const titles = [
+            "Surgeries Performed in Korea",
             "Analysis of the Distribution of Surgeries by Organs and Systems",
             "Distribution of Surgeries Related to Cancer Diagnoses",
-            "Comparison of Surgeries Performed on Female and Male Cancer Patients by Organ Systems",
-            "Who? What? Where?"
+            "Comparison of Surgeries Performed on Female and Male Cancer Patients by Organ Systems"
         ];
         title.text(titles[currentState]);
     }
 
     function updateLegend() {
-        d3.select("#legend").remove();
-        let legend = d3.select("body").append("div")
-            .attr("id", "legend")
-            .style("position", "fixed")
-
-        let legendData;
+        let legend = d3.select("#legend");
+    
         if (currentState === 0) {
+            // Completely hide the legend at step 0
+            legend.transition()
+                .duration(500)
+                .style("opacity", 0)
+                .on("end", function() { 
+                    d3.select(this).style("display", "none"); // Hide it completely
+                });
+            return;
+        }
+    
+        // If we are not in step 0, ensure the legend exists and is visible
+        if (legend.empty()) {
+            legend = d3.select("body").append("div")
+                .attr("id", "legend")
+                .style("position", "fixed")
+                .style("bottom", "20px")
+                .style("left", "62%")
+                .style("transform", "translateX(-50%)")
+                .style("background", "transparent")
+                .style("backdrop-filter", "blur(15px)")
+                .style("padding", "10px")
+                .style("border", "1px solid #adadad")
+                .style("border-radius", "5px")
+                .style("display", "none") // Start hidden
+                .style("gap", "15px")
+                .style("justify-content", "center")
+                .style("z-index", "100")
+                .style("opacity", 0);
+        }
+    
+        // Ensure legend is visible when moving to step 1+
+        legend.style("display", "flex")
+              .transition()
+              .duration(500)
+              .style("opacity", 1);
+    
+        let legendData;
+        if (currentState === 1) {
             legendData = [
                 { label: "All Other Surgeries", color: "lightgrey" },
                 { label: "System-specific Surgery", color: "red" }
             ];
-        } else if (currentState === 1) {
+        } else if (currentState === 2) {
             legendData = [
                 { label: "Cancer", color: "orange" },
                 { label: "Non-Cancer", color: "lightgrey" }
             ];
-        } else if (currentState === 2){
+        } else if (currentState === 3) {
             legendData = [
                 { label: "Non-Cancer", color: "lightgrey" },
                 { label: "Male Cancer", color: "lightblue" },
                 { label: "Female Cancer", color: "pink" }
             ];
+        } else {
+            return; // No legend for other steps
         }
-
-        legend.selectAll(".legend-item")
-            .data(legendData)
-            .enter()
+    
+        // Update legend items
+        let items = legend.selectAll(".legend-item")
+            .data(legendData);
+    
+        items.enter()
             .append("div")
             .attr("class", "legend-item")
             .style("display", "flex")
             .style("align-items", "center")
             .style("margin", "5px")
+            .merge(items)
             .html(d => `<span style="background-color:${d.color}; width:16px; height:16px; margin-right:5px; display:inline-block; border-radius:50%;"></span>${d.label}`);
+    
+        items.exit().remove();
     }
+    
+    
+    
 
     // Add window resize handler
     scroller.setup({
         step: ".step",
         offset: 0.5,
         debug: false
-    })
-        .onStepEnter(response => {
-            currentState = response.index;
+    }).onStepEnter(response => {
+        currentState = response.index;
+
+        // Ensure animation container exists within #center-container at the beginning
+        let animationContainer = d3.select("#main-container").select("#animation-container");
+
+        if (animationContainer.empty()) {
+            animationContainer = d3.select("#main-container")
+                .append("div")
+                .attr("id", "animation-container")
+                .style("position", "absolute")
+                .style("top", "50%")
+                .style("left", "50%")
+                .style("transform", "translate(-50%, -50%)")
+                .style("width", "100%")
+                .style("height", "100%")
+                .style("display", "flex")
+                .style("justify-content", "center")
+                .style("align-items", "center")
+                .style("z-index", "10")
+                .style("opacity", 1); // Initially hidden
+        }
+    
+        if (currentState === 0) {
+            // Ensure the animation container is always displayed when returning to step 0
+            animationContainer
+            .interrupt()
+            .style("display", "flex")
+            .style("opacity", 1);
+
+            animationContainer.node().offsetHeight; // <-- Forces the browser to recognize the style change
+
+            animationContainer.transition()
+                .duration(800)
+                .style("opacity", 1);
+
+
+            // Re-trigger the animation on re-entry to step 0
+            d3.select("#animation-container").selectAll("*").remove(); // Clear any existing elements
+
+            animateScalpels("#animation-container");
+
+            animationContainer.transition()
+                    .duration(800)
+                    .style("opacity", 1);
+
+            d3.select("#visualization-wrapper")
+                .transition()
+                .duration(800)
+                .style("opacity", 0)
+                .style("pointer-events", "none");
+
+            d3.select("#animation-container")
+                .transition()
+                .duration(800)
+                .style("opacity", 1); // Ensure animation remains visible
+
+            
+        } 
+        else if (currentState === 1) {
+            animationContainer.transition()
+                    .duration(800)
+                    .style("opacity", 0)
+                    .style("display", "none");  // Hides it but doesn't remove it
+
+            d3.select("#visualization-wrapper")
+                .transition()
+                .duration(500)
+                .style("opacity", 1)
+                .style("pointer-events", "auto");
+        } else {
+            // Ensure visualizations remain visible in later steps
+            d3.select("#visualization-wrapper").style("opacity", 1);
+        }
+    
+        updateLegend(); // Ensure legend updates on every step change
+
+        if (currentState > 0) {
             updateAll();
-        });
-    
+        }
+    });
+        
     window.addEventListener("resize", scroller.resize);
-    
+
 });
