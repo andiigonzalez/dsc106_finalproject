@@ -439,6 +439,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "",
             "Analysis of the Distribution of Surgeries by Organs and Systems",
             "Distribution of Surgeries Related to Cancer Diagnoses",
+            "Comparison of Surgeries Performed on Female and Male Cancer Patients by Organ Systems",
             "Comparison of Surgeries Performed on Female and Male Cancer Patients by Organ Systems"
         ];
         title.text(titles[currentState]);
