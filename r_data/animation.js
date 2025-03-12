@@ -5,10 +5,10 @@ export function animateScalpels() {
 
     // Define starting positions for each scalpel
     const scalpels = [
-        { id: "tl", x: 100, y: 50, img: "Images/scalpel_tl.png" },  // Top-left
-        { id: "tr", x: 650, y: 50, img: "Images/scalpel_tr.png" },  // Top-right
+        { id: "tl", x: 100, y: 0, img: "Images/scalpel_tl.png" },  // Top-left
+        { id: "tr", x: 700, y: 0, img: "Images/scalpel_tr.png" },  // Top-right
         { id: "bl", x: 100, y: 450, img: "Images/scalpel_bl.png" },  // Bottom-left
-        { id: "br", x: 650, y: 450, img: "Images/scalpel_br.png" }   // Bottom-right
+        { id: "br", x: 700, y: 450, img: "Images/scalpel_br.png" }   // Bottom-right
     ];
 
     // Create the SVG container
@@ -22,9 +22,9 @@ export function animateScalpels() {
     svg.append("image")
         .attr("xlink:href", "Images/wholehuman_body.png")
         .attr("x", centerX - 150)
-        .attr("y", centerY - 250)
-        .attr("width", 300)
-        .attr("height", 450)
+        .attr("y", centerY - 300)
+        .attr("width", 360)
+        .attr("height", 540)
         .style("opacity", 1);  // Always visible
 
     // Function to animate a scalpel
@@ -41,8 +41,8 @@ export function animateScalpels() {
             .style("opacity", 1)
             .transition()
             .duration(2000)  // 2 sec move toward center
-            .attr("x", centerX - 25)
-            .attr("y", centerY - 130)
+            .attr("x", centerX + 5)
+            .attr("y", centerY - 150)
             .transition()
             .duration(1000)  // 1 sec fade-out
             .style("opacity", 0)

@@ -313,7 +313,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 { label: "Cancer", value: totalCancer, color: "orange" },
                 { label: "Non-Cancer", value: total - totalCancer, color: "lightgrey" }
             ];
-            textContent = `Out of all <b style="color:orange">${optype}</b> surgeries, <b style="color:orange">${Math.round((totalCancer / total) * 100)}%</b> were cancer diagnoses.`;
+            textContent = `Out of all <b style="color:orange">${optype}</b> surgeries, <b style="color:orange">${Math.round((totalCancer / total) * 100)}%</b> were cancer-related.`;
         } else if (currentState === 3) {
             referenceTotal = totalCancer; // Now, cancer surgeries become 100%
             data = [
@@ -436,7 +436,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateTitle() {
         const titles = [
-            "Surgeries Performed in Korea",
+            "",
             "Analysis of the Distribution of Surgeries by Organs and Systems",
             "Distribution of Surgeries Related to Cancer Diagnoses",
             "Comparison of Surgeries Performed on Female and Male Cancer Patients by Organ Systems"
@@ -553,6 +553,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         if (currentState === 0) {
+            updateTitle(); // Ensure the title updates when going back to step 0
             // Ensure the animation container is always displayed when returning to step 0
             animationContainer
             .interrupt()
