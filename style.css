@@ -356,3 +356,26 @@ background: transparent;
 border-radius: 8px;
 box-shadow: 0 2px 4px rgba(97, 97, 97, 0.1);
 }
+
+/* Pulsing Dot Effect */
+.pulsing-dot {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  fill: rgb(255, 232, 20);
+  stroke: white;
+  border-radius: 50%;
+  opacity: 0;
+  transform-origin: center center; /* Ensures scaling happens from the center */
+  transition: transform 0.8s ease-in-out, opacity 0.5s ease-in-out;
+  animation: pulse 3s infinite ease-in-out;
+  pointer-events: none; /* Prevents interaction issues */
+  display: none; /* Ensure it doesn't appear on load */
+}
+
+@keyframes pulse {
+  0% { r: 10; opacity: 0.9; }
+  50% { r: 60; opacity: 0.2; }
+  100% { r: 10; opacity: 0.9; }
+}
+

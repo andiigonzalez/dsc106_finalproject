@@ -6,7 +6,17 @@ document.addEventListener("DOMContentLoaded", function () {
     let cancerData = {};
     let genderData = {};
     let svgElements = {};
-    //let width = 150, height = 150, radius = Math.min(width, height) / 2;
+    const organPositions = {
+        "Thyroid": { x: 120, y: 100 },
+        "Stomach": { x: 180, y: 450 },
+        "Pancreas": { x: 105, y: 510 },
+        "Kidneys": { x: 185, y: 525 },
+        "Heart": { x: 130, y: 360 },
+        "Liver": { x: 70, y: 430 },
+        "Intestines": { x: 120, y: 620},
+        "Reproductive": { x: 120, y: 750 }
+    };
+    
   
     const steps = document.querySelectorAll(".step");
   
@@ -59,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         d3.xml("Images/only_organs_removebg.svg").then(function (xml) {
 
-            const svgContainer = centerContainer.append("div")
+            const svgContainer = d3.select("#center-container").append("div")
                 .attr("id", "svg-container")
                 .style("width", "50%")
                 .style("display", "flex")
@@ -71,8 +81,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 .style("left", "70px") // Move right by 70px
                 .style("z-index", "0");
 
-
-
             let importedNode = document.importNode(xml.documentElement, true);
             importedNode.id = "body-svg";
 
@@ -82,31 +90,64 @@ document.addEventListener("DOMContentLoaded", function () {
             importedNode.setAttribute("viewBox", "0 0 400 800"); // Adjust viewBox to match your SVG content
             
             svgContainer.node().appendChild(importedNode);
+            // Delay the appending of the pulsing dot to ensure SVG loads first
             setTimeout(() => {
-                // Find and store organ elements
-                positions.forEach(pos => {
-                    pos.element = document.getElementById(pos.organId);
-                    if (!pos.element) {
-                        console.warn(`Organ element #${pos.organId} not found`);
+                const centerSvg = d3.select("#body-svg");
+                if (!centerSvg.empty()) {
+                    console.log("SVG found! Appending pulsing dot...");
+
+                    const pulsingDot = centerSvg.append("circle")
+                        .attr("class", "pulsing-dot")
+                        .attr("r", 10) // Dot radius
+
+                    function showPulsingDot(organName) {
+                        if (!organPositions[organName]) return;
+
+                        const { x, y } = organPositions[organName];
+
+                        pulsingDot
+                            .interrupt() // Stop any existing transitions
+                            .attr("cx", x)
+                            .attr("cy", y)
+                            .style("display", "block") // Ensure it appears
+                            .transition()
+                            .duration(300)
+                            .style("opacity", 1);
                     }
-                });
-                
-                // Initialize charts now that containers exist
-                createBarCharts();
-                updateAll();
-              
-                positions.forEach(pos => {
-                    d3.select(`#chart-container-${pos.id}`)
-                        .style("cursor", "pointer")
-                        .on("mouseenter", () => {
-                            showOrganConnection(pos);
-                        })
-                        .on("mouseleave", () => {
-                            hideOrganConnections();
-                        });
-                });
+
+                    function hidePulsingDot() {
+                        pulsingDot
+                            .transition()
+                            .duration(200)
+                            .style("opacity", 0)
+                            .on("end", function () {
+                                d3.select(this).style("display", "none"); // Ensure it's hidden after fade out
+                            });
+                    }
+
+
+                    positions.forEach(pos => {
+                        d3.select(`#chart-container-${pos.id}`)
+                            .style("cursor", "pointer") // Ensure hover cursor
+                            .on("mouseenter", () => {
+                                console.log(`Hovering over ${pos.id}`);
+                                showPulsingDot(pos.organName);
+                            })
+                            .on("mouseleave", hidePulsingDot);
+                    });
+                } else {
+                    console.error("Main SVG #body-svg not found! Ensure it loads before appending the pulsing dot.");
+                }
+                    
+                    // Initialize charts now that containers exist
+                    createBarCharts();
+                    updateAll();
             }, 500);
         });
+
+        // Create the pulsing dot container inside the central SVG
+        const centerSvg = d3.select("#body-svg");
+
     });
 
     function createChartContainer(parentContainer, pos) {
@@ -308,68 +349,6 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select(`#text-${optype}`).html(textContent);
     }
 
-    function showOrganConnection(pos) {
-        arrowsSvg.selectAll("*").remove();
-
-        if (!pos.element) return;
-
-        arrowsSvg.append("defs").append("marker")
-            .attr("id", "arrowhead")
-            .attr("viewBox", "0 -5 10 10")
-            .attr("refX", 8)
-            .attr("refY", 0)
-            .attr("markerWidth", 6)
-            .attr("markerHeight", 6)
-            .attr("orient", "auto")
-            .append("path")
-            .attr("d", "M0,-5L10,0L0,5")
-            .attr("fill", "#555");
-
- 
-        if (pos.element) {
-            d3.select(pos.element)
-                .style("filter", "drop-shadow(0 0 5px red)")
-                .style("opacity", 1);
-        }
-
-
-        const centerRect = centerContainer.node().getBoundingClientRect();
-        const organRect = pos.element.getBoundingClientRect();
-        const chartContainer = document.getElementById(`chart-container-${pos.id}`);
-        const chartRect = chartContainer.getBoundingClientRect();
-        
-        // Calculate coordinates relative to the arrowsSvg
-        const organX = organRect.left + organRect.width/2 - centerRect.left;
-        const organY = organRect.top + organRect.height/2 - centerRect.top;
-        const chartX = chartRect.left + chartRect.width/2 - centerRect.left;
-        const chartY = chartRect.top + chartRect.height/2 - centerRect.top;
-        
-  
-        arrowsSvg.append("path")
-            .attr("d", `M${organX},${organY} L${chartX},${chartY}`)
-            .attr("fill", "black")
-            .attr("stroke", "red")
-            .attr("stroke-width", 2)
-            .attr("stroke-dasharray", "5,3")
-            .attr("marker-end", "url(#arrowhead)")
-            .style("opacity", 0.8);
-    }
-
- 
-    function hideOrganConnections() {
-        arrowsSvg.selectAll("*").remove();
-        
-        // Remove highlighting from all organs
-        positions.forEach(pos => {
-            if (pos.element) {
-                d3.select(pos.element)
-                    .style("filter", null)
-                    .style("opacity", null);
-            }
-            
-        });
-    }
-
     function updateAll() {
         let totalSurgeries = d3.sum(Object.values(surgeryData));
         updateTitle();
@@ -378,7 +357,6 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("Current state:", currentState);
     
         positions.forEach(pos => {
-            //console.log(`Updating pie chart for ${pos.id}`);
             updateBarChart(pos.id, totalSurgeries);
         });
     }
