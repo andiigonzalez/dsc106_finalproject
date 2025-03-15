@@ -14,72 +14,26 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("id", "status-title")
         .style("text-align", "center");
     
-    const mainContainer = d3.select("#main-container")
-        .style("display", "flex")
-        .style("flex-direction", "column")
-        .style("align-items", "center")
-        .style("width", "100%")
-        .style("max-width", "1200px")
-        .style("margin", "0 auto");
+    const mainContainer = d3.select("#main-container");
 
     const scroller = scrollama();
 
     const visualizationWrapper = mainContainer.append("div")
-        .attr("id", "visualization-wrapper")
-        .style("display", "flex")
-        .style("flex-direction", "row") // Ensure horizontal layout
-        .style("justify-content", "space-between") 
-        .style("width", "100%")
-        .style("position", "relative")
-        .style("margin-top", "10px")
-        .style("height", "900px");
-
+        .attr("id", "visualization-wrapper");
 
     const leftChartsContainer = visualizationWrapper.append("div")
-        .attr("id", "left-charts-container")
-        .style("display", "flex")
-        .style("flex-direction", "column")
-        .style("justify-content", "flex-start")
-        .style("width", "30%")
-        .style("padding-right", "20px")
-        .style("z-index", "1");
+        .attr("id", "left-charts-container");
 
     const centerContainer = visualizationWrapper.append("div")
-        .attr("id", "center-container")
-        .style("display", "flex")
-        .style("justify-content", "center")
-        .style("align-items", "center")
-        .style("width", "40%") 
-        .style("height", "80vh") // Adjust height to fill viewport properly
-        .style("position", "relative")
-        .style("top", "0px") // Ensure it aligns with the top
-        .style("z-index", "0");
+        .attr("id", "center-container");
 
     const rightChartsContainer = visualizationWrapper.append("div")
-        .attr("id", "right-charts-container")
-        .style("display", "flex")
-        .style("flex-direction", "column")
-        .style("justify-content", "flex-start")
-        .style("width", "30%")
-        .style("padding-left", "20px")
-        .style("z-index", "1");
-
-
-    const arrowsSvg = centerContainer.append("svg")
-      .attr("id", "arrows-svg")
-      .attr("width", "100%")
-      .attr("height", "100%")
-      .style("position", "absolute")
-      .style("top", "0")
-      .style("left", "0")
-      .style("pointer-events", "none")
-      .style("z-index", "2");
-
+        .attr("id", "right-charts-container");
 
     const leftPositions = [
         { id: "Lymphatic-Endocrine", label: "Lymphatic/Endocrine System", organId: "Thyroid", organName: "Thyroid" },
         { id: "Digestive", label: "Digestive System", organId: "Stomach", organName: "Stomach" },
-        { id: "Pancreatic-Billiary", label: "Pancreatic/Billiary System", organId: "Pancreas", organName: "Pancreas" },
+        { id: "Pancreatic-Biliary", label: "Pancreatic/Biliary System", organId: "Pancreas", organName: "Pancreas" },
         { id: "Urinary", label: "Urinary System", organId: "Kidneys", organName: "Kidneys" }
     ];
     
@@ -162,8 +116,8 @@ document.addEventListener("DOMContentLoaded", function () {
             .style("flex-direction", "column") // Stack elements vertically
             .style("align-items", "center")
             .style("justify-content", "space-between")
-            .style("margin", "10px 0")
-            .style("padding", "10px")
+            .style("margin", "5px")
+            .style("padding", "5px")
             .style("background", "transparent")
             .style("border-radius", "8px")
             .style("box-shadow", "0 2px 4px rgba(110, 110, 110, 0.1)")
@@ -181,7 +135,8 @@ document.addEventListener("DOMContentLoaded", function () {
         // Title
         const titleContainer = topSection.append("div")
             .style("width", "35%") // Allocate space for title
-            .style("text-align", "center");
+            .style("text-align", "left")
+            .style("padding-left", "10px");
     
         titleContainer.append("h4")
             .text(pos.label)
@@ -193,29 +148,24 @@ document.addEventListener("DOMContentLoaded", function () {
             .style("width", "30%") // Allocate space for image
             .style("display", "flex")
             .style("justify-content", "center")
-            .style("align-items", "center");
+            .style("align-items", "center")
+            .style("padding-left", "10px");
     
         imageContainer.append("img")
             .attr("src", `Images/${pos.organId}.png`)
-            .attr("width", "50px")
-            .attr("height", "50px");
+            .attr("width", "45px")
+            .attr("height", "45px");
     
         // Description
         const descriptionContainer = topSection.append("div")
             .attr("id", `text-${pos.id}`)
             .style("width", "50%") // Allocate space for description
-            .style("font-size", "14px")
-            .style("text-align", "left")
-            .style("padding-left", "10px");
+            .style("font-size", "12px")
+            .style("text-align", "left");
     
         // Bottom Section: Bar Container (spanning full width)
         const barContainer = container.append("div")
-            .attr("id", `chart-${pos.id}`)
-            .style("width", "100%") // Full width
-            .style("height", "30px")
-            .style("background", "transparent")
-            .style("border-radius", "5px")
-            .style("margin-top", "10px");
+            .attr("id", `chart-${pos.id}`);
     }
     
     
@@ -313,7 +263,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 { label: "Cancer", value: totalCancer, color: "orange" },
                 { label: "Non-Cancer", value: total - totalCancer, color: "lightgrey" }
             ];
-            textContent = `Out of all <b style="color:orange">${optype}</b> surgeries, <b style="color:orange">${Math.round((totalCancer / total) * 100)}%</b> were cancer diagnoses.`;
+            textContent = `Out of all <b style="color:orange">${optype}</b> surgeries, <b style="color:orange">${Math.round((totalCancer / total) * 100)}%</b> were cancer-related.`;
         } else if (currentState === 3) {
             referenceTotal = totalCancer; // Now, cancer surgeries become 100%
             data = [
@@ -436,9 +386,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateTitle() {
         const titles = [
-            "Surgeries Performed in Korea",
+            "",
             "Analysis of the Distribution of Surgeries by Organs and Systems",
             "Distribution of Surgeries Related to Cancer Diagnoses",
+            "Comparison of Surgeries Performed on Female and Male Cancer Patients by Organ Systems",
             "Comparison of Surgeries Performed on Female and Male Cancer Patients by Organ Systems"
         ];
         title.text(titles[currentState]);
@@ -462,19 +413,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (legend.empty()) {
             legend = d3.select("body").append("div")
                 .attr("id", "legend")
-                .style("position", "fixed")
-                .style("bottom", "20px")
-                .style("left", "62%")
-                .style("transform", "translateX(-50%)")
-                .style("background", "transparent")
-                .style("backdrop-filter", "blur(15px)")
-                .style("padding", "10px")
-                .style("border", "1px solid #adadad")
-                .style("border-radius", "5px")
                 .style("display", "none") // Start hidden
-                .style("gap", "15px")
-                .style("justify-content", "center")
-                .style("z-index", "100")
                 .style("opacity", 0);
         }
     
@@ -538,21 +477,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (animationContainer.empty()) {
             animationContainer = d3.select("#main-container")
                 .append("div")
-                .attr("id", "animation-container")
-                .style("position", "absolute")
-                .style("top", "50%")
-                .style("left", "50%")
-                .style("transform", "translate(-50%, -50%)")
-                .style("width", "100%")
-                .style("height", "100%")
-                .style("display", "flex")
-                .style("justify-content", "center")
-                .style("align-items", "center")
-                .style("z-index", "10")
-                .style("opacity", 1); // Initially hidden
+                .attr("id", "animation-container");
         }
     
         if (currentState === 0) {
+            updateTitle(); // Ensure the title updates when going back to step 0
             // Ensure the animation container is always displayed when returning to step 0
             animationContainer
             .interrupt()
@@ -563,7 +492,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             animationContainer.transition()
                 .duration(800)
-                .style("opacity", 1);
+                .style("opacity", 1)
+                .style("transition", "opacity 0.5s ease-inout");
 
 
             // Re-trigger the animation on re-entry to step 0

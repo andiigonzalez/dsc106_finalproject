@@ -159,12 +159,14 @@ margin: auto;
 }
 
 #main-container {
+display: flex;
 flex: 2;
 position: fixed;
 right: 120px;
-top: 100px;  /* Push down to prevent overlap */
-width: 55%;
-height: calc(100vh - 80px); /* Adjust height */
+top: 80px;  /* Push down to prevent overlap */
+width: 100%;
+max-width: 1200px;
+height: calc(100vh); /* Adjust height */
 overflow-y: auto;
 background: transparent;
 padding: 20px;
@@ -173,6 +175,18 @@ flex-direction: column;
 align-items: center;
 justify-content: center; /* Center content vertically */
 z-index: 1;
+margin: 0 auto;
+}
+
+
+#visualization-wrapper {
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+width: 100%;
+position: relative;
+margin-top: 10px;
+height: 900px;
 }
 
 
@@ -185,30 +199,31 @@ max-width: 800px;
 margin: 20px auto;
 }
 
+#left-charts-container, #right-charts-container {
+display: flex;
+flex-direction: column;
+justify-content: flex-start;
+width: 30%;
+padding: 0 20px;
+z-index: 1;
+}
+
+#center-container {
+display: flex;
+justify-content: center;
+align-items: center;
+width: 40%;
+height: 80vh;  /* Adjust height to fill viewport properly*/
+position: relative;
+top: 0px; /* Ensure it aligns with the top */
+z-index: 0;
+}
+
 #body_image {
 display: block;
 max-width: 500px;
 margin: auto;
 }
-
-.pie-chart-container {
-width: 150px;
-height: 150px;
-background: transparent;
-box-shadow: 0px 2px 4px rgba(110, 110, 110, 0.1);
-border-radius: 10px;
-padding: 10px;
-text-align: center;
-}
-
-.pie-text {
-font-size: 10px;
-font-weight: bold;
-fill: black !important;
-text-anchor: middle;
-dominant-baseline: central;
-}
-
 
 .bar-chart-container {
 display: flex;
@@ -238,7 +253,9 @@ width: 100%;
 
 .bar-container {
 width: 100%;
-height: 30px;
+height: 40px;
+background: transparent;
+border-radius: 5px;
 margin-top: auto;
 position: absolute;
 bottom: 0;
@@ -272,13 +289,14 @@ opacity: 1;
 
 
 .organ-icon {
-width: 50px;
-height: 50px;
+width: 40px;
+height: 40px;
 margin-top: 5px;
 }
 
 .description-container {
-width: 30%;
+width: 50%;
+font-size: 14px;
 text-align: left;
 padding-left: 10px;
 }
@@ -294,7 +312,7 @@ margin-top: 10px;
 /* Legend */
 
 #legend {
-position: absolute;
+position: fixed;
 bottom: 20px;
 left: 62%;
 transform: translateX(-50%);
