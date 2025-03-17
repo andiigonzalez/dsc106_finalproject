@@ -559,7 +559,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let sortedDiagnoses = Object.entries(diagnoses)
             .map(([dx, count]) => ({
                 name: dx,
-                percentage: ((count / total) * 100).toFixed(1),
+                percentage: ((count / total) * 100).toFixed(2),
                 cases: count,
                 total: total
             }))
@@ -580,7 +580,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let sortedDiagnoses = Object.entries(diagnoses)
             .map(([dx, count]) => ({
                 name: dx,
-                percentage: Math.round((count / total) * 100) // Calculate percentage
+                percentage: ((count / total) * 100).toFixed(2) // Calculate percentage with 2 decimals
             }))
             .sort((a, b) => b.percentage - a.percentage); // Sort in descending order
     
