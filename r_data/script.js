@@ -59,6 +59,17 @@ document.addEventListener("DOMContentLoaded", function () {
     leftPositions.forEach(pos => createChartContainer(leftChartsContainer, pos));
     rightPositions.forEach(pos => createChartContainer(rightChartsContainer, pos));
 
+    const closeButton = document.querySelector("#close-panel");
+    if (closeButton) {
+        closeButton.addEventListener("click", function () {
+            console.log("Close button clicked!");
+            d3.select("#side-panel")
+                .classed("show", false)
+                .style("right", "-350px"); // Move panel off-screen
+        });
+    } else {
+        console.error("Close button not found!");
+    }
 
     d3.csv("sugeries.csv").then(function (data) {
         processData(data);
@@ -94,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
             setTimeout(() => {
                 const centerSvg = d3.select("#body-svg");
                 if (!centerSvg.empty()) {
-                    console.log("SVG found! Appending pulsing dot...");
+                    //console.log("SVG found! Appending pulsing dot...");
 
                     const pulsingDot = centerSvg.append("circle")
                         .attr("class", "pulsing-dot")
@@ -133,7 +144,13 @@ document.addEventListener("DOMContentLoaded", function () {
                                 console.log(`Hovering over ${pos.id}`);
                                 showPulsingDot(pos.organName);
                             })
-                            .on("mouseleave", hidePulsingDot);
+                            .on("mouseleave", hidePulsingDot)
+                            .on("click", function () {
+                                if (currentState === 0) return; // No panel for step 0
+                        
+                                let content = generatePanelContent(pos.id, currentState);
+                                toggleSidePanel(content);
+                            });;
                     });
                 } else {
                     console.error("Main SVG #body-svg not found! Ensure it loads before appending the pulsing dot.");
@@ -211,9 +228,12 @@ document.addEventListener("DOMContentLoaded", function () {
     
     
 
+    let globalData = []; // Declare a global variable
+
     d3.csv("sugeries.csv").then(data => {
-        const processedData = processData(data);
-        createBarCharts(processedData);
+        globalData = data; // Store data globally
+        processData(data); // Process data
+        createBarCharts(); // Create charts after processing
     });
 
     function processData(data) {
@@ -438,6 +458,140 @@ document.addEventListener("DOMContentLoaded", function () {
         items.exit().remove();
     }
     
+    function toggleSidePanel(content) {
+        console.log("toggleSidePanel triggered!");
+        
+        const panel = d3.select("#side-panel");
+        const panelContent = d3.select("#panel-content");
+    
+        if (panel.classed("show")) {
+            console.log("Closing Side Panel...");
+            panel.classed("show", false)
+                 .style("right", "-350px"); //Move off-screen
+            setTimeout(() => {
+                panelContent.html(""); // Clear content when closing
+            }, 300);
+        } else {
+            console.log("Opening Side Panel...");
+            panelContent.html(content);
+            panel.classed("show", true)
+                 .style("right", "0px"); //Bring on-screen
+        }
+
+        console.log("Panel classes before toggle:", panel.attr("class"));
+
+    }
+
+    function generatePanelContent(optype, step) {
+        let content = `<h3>${optype} Data</h3>`;
+    
+        if (step === 1) {
+            content += `<p>Diagnosis breakdown for ${optype}:</p>`;
+            let total = surgeryData[optype] || 1;
+            let diagnoses = countDiagnoses(optype);
+            content += formatDiagnosisList(diagnoses, total);
+        } 
+        else if (step === 2) {
+            content += `<p><strong>Cancer-related diagnoses:</strong></p>`;
+            let totalCancer = cancerData[optype] || 1;
+            let diagnoses = countDiagnoses(optype, true);
+            content += formatDiagnosisList(diagnoses, totalCancer);
+        } 
+        else if (step === 3) {
+            content += `<p><strong>Gender-Specific Cancer Diagnoses</strong></p>`;
+            let maleDiagnoses = countDiagnosesByGender(optype, 'M');
+            let femaleDiagnoses = countDiagnosesByGender(optype, 'F');
+    
+            content += `<h4>Men</h4>`;
+            content += formatDiagnosisListWithCounts(maleDiagnoses, genderData[optype]?.M || 1);
+            
+            content += `<h4>Women</h4>`;
+            content += formatDiagnosisListWithCounts(femaleDiagnoses, genderData[optype]?.F || 1);
+        }
+    
+        return content;
+    }
+
+    function countDiagnoses(optype, cancerOnly = false) {
+        if (!globalData.length) {
+            console.error("Global data is not loaded yet.");
+            return {};
+        }
+    
+        let filteredData = globalData.filter(d => d.optype.replace(/\//g, "-") === optype);
+    
+        if (cancerOnly) {
+            filteredData = filteredData.filter(d => 
+                /(cancer|carcinoma|malignant|blastoma|tumor|neoplasm|sarcoma|glioma|lymphoma|leukemia|melanoma|mesothelioma|myeloma|teratoma)/i.test(d.dx));
+        }
+    
+        let diagnosisCount = {};
+        filteredData.forEach(d => {
+            diagnosisCount[d.dx] = (diagnosisCount[d.dx] || 0) + 1;
+        });
+    
+        return diagnosisCount;
+    }
+
+    function countDiagnosesByGender(optype, gender) {
+        if (!globalData.length) {
+            console.error("Global data is not loaded yet.");
+            return {};
+        }
+    
+        let filteredData = globalData.filter(d => 
+            d.optype.replace(/\//g, "-") === optype && 
+            d.sex === gender &&
+            /(cancer|carcinoma|malignant|blastoma|tumor|neoplasm|sarcoma|glioma|lymphoma|leukemia|melanoma|mesothelioma|myeloma|teratoma)/i.test(d.dx)
+        );
+    
+        let diagnosisCount = {};
+        filteredData.forEach(d => {
+            diagnosisCount[d.dx] = (diagnosisCount[d.dx] || 0) + 1;
+        });
+    
+        return diagnosisCount;
+    }
+    
+    function formatDiagnosisListWithCounts(diagnoses, total) {
+        let content = "<ul>";
+
+        let sortedDiagnoses = Object.entries(diagnoses)
+            .map(([dx, count]) => ({
+                name: dx,
+                percentage: ((count / total) * 100).toFixed(1),
+                cases: count,
+                total: total
+            }))
+            .sort((a, b) => b.percentage - a.percentage);
+
+        sortedDiagnoses.forEach(d => {
+            content += `<li>${d.name}: ${d.percentage}% (${d.cases} cases out of ${d.total})</li>`;
+        });
+
+        content += "</ul>";
+        return content;
+    }
+    
+    function formatDiagnosisList(diagnoses, total) {
+        let content = "<ul>";
+    
+        // Convert object entries to an array, sort them by count in descending order
+        let sortedDiagnoses = Object.entries(diagnoses)
+            .map(([dx, count]) => ({
+                name: dx,
+                percentage: Math.round((count / total) * 100) // Calculate percentage
+            }))
+            .sort((a, b) => b.percentage - a.percentage); // Sort in descending order
+    
+        // Create the list items from the sorted array
+        sortedDiagnoses.forEach(d => {
+            content += `<li>${d.name}: ${d.percentage}%</li>`;
+        });
+    
+        content += "</ul>";
+        return content;
+    }
     
     
 
@@ -459,6 +613,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         if (currentState === 0) {
+            d3.select("#side-panel").classed("show", false); // Ensure side panel is hidden on step 0
             updateTitle(); // Ensure the title updates when going back to step 0
             // Ensure the animation container is always displayed when returning to step 0
             animationContainer
